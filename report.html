@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Report Card Generator</title>
+  <!-- Include jsPDF and html2canvas for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* Reset and base */
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      touch-action: none;
+    }
+    
+    /* Prevent zoom on double tap */
+    button, select, input {
+      touch-action: manipulation;
+    }
+    
+    .login-card, .main-card {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      margin: auto;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-height: 95vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Hide scrollbar but allow scroll */
+    .login-card::-webkit-scrollbar, .main-card::-webkit-scrollbar {
+      width: 0;
+      background: transparent;
+    }
+    
+    .login-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 30px 20px 25px;
+      text-align: center;
+      color: white;
+    }
+    
+    .login-header h1 { 
+      font-size: clamp(22px, 6vw, 28px); 
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+    .login-header p { 
+      font-size: clamp(12px, 3vw, 14px); 
+      opacity: 0.9; 
+    }
+    .login-icon { 
+      font-size: clamp(40px, 10vw, 50px); 
+      margin-bottom: 10px; 
+      display: block;
+    }
+    
+    .login-body { 
+      padding: clamp(20px, 5vw, 30px); 
+    }
+    
+    .input-group { 
+      margin-bottom: clamp(15px, 4vw, 20px); 
+    }
+    
+    .input-group label { 
+      display: block; 
+      margin-bottom: 6px; 
+      font-weight: 600; 
+      color: #333; 
+      font-size: clamp(13px, 3.5vw, 14px); 
+    }
+    
+    .input-group input {
+      width: 100%;
+      padding: clamp(12px, 3.5vw, 14px) clamp(14px, 4vw, 18px);
+      border: 2px solid #e0e0e0;
+      border-radius: 30px;
+      font-size: clamp(14px, 3.8vw, 16px);
+      font-family: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    
+    .input-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: clamp(14px, 4vw, 16px);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: clamp(15px, 4vw, 17px);
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    
+    .login-btn:active { 
+      transform: scale(0.97); 
+    }
+    
+    .error {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 10px 14px;
+      border-radius: 30px;
+      text-align: center;
+      margin-top: 12px;
+      font-size: clamp(11px, 3vw, 12px);
+      display: none;
+    }
+    .error.show { display: block; }
+    
+    .main-card { display: none; }
+    
+    .main-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: clamp(20px, 5vw, 25px) clamp(15px, 4vw, 20px);
+      text-align: center;
+      color: white;
+    }
+    .main-header h2 { 
+      font-size: clamp(18px, 5vw, 22px); 
+    }
+    
+    .main-body { 
+      padding: clamp(18px, 4vw, 25px); 
+    }
+    
+    .main-body label { 
+      font-weight: 600; 
+      display: block; 
+      margin-bottom: 6px; 
+      font-size: clamp(12px, 3.2vw, 13px); 
+      color: #333; 
+    }
+    
+    .main-body select {
+      width: 100%;
+      padding: clamp(12px, 3.5vw, 14px) clamp(14px, 4vw, 16px);
+      border: 2px solid #e0e0e0;
+      border-radius: 30px;
+      font-size: clamp(14px, 3.8vw, 16px);
+      margin-bottom: clamp(12px, 3vw, 15px);
+      background: white;
+      -webkit-appearance: none;
+      appearance: none;
+      font-family: inherit;
+      touch-action: manipulation;
+    }
+    
+    .btn-group { 
+      display: flex; 
+      flex-direction: column; 
+      gap: clamp(10px, 2.5vw, 12px); 
+      margin-top: clamp(15px, 4vw, 20px); 
+    }
+    
+    .btn-primary {
+      padding: clamp(14px, 4vw, 16px);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: clamp(14px, 3.8vw, 16px);
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s;
+    }
+    
+    .btn-primary:active { 
+      transform: scale(0.97); 
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-primary.bulk {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .info-note {
+      background: #e8f4f8;
+      padding: clamp(8px, 2vw, 10px) clamp(12px, 3vw, 15px);
+      border-radius: 12px;
+      font-size: clamp(10px, 2.8vw, 11px);
+      color: #1565c0;
+      text-align: center;
+      margin-top: clamp(12px, 3vw, 15px);
+      line-height: 1.4;
+    }
+    
+    /* Loading Overlay */
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      flex-direction: column;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .loading.show { display: flex; }
+    
+    .spinner {
+      width: clamp(40px, 10vw, 50px);
+      height: clamp(40px, 10vw, 50px);
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .loading p { 
+      color: white; 
+      font-size: clamp(13px, 3.5vw, 15px); 
+      margin-top: 8px;
+      text-align: center;
+      padding: 0 20px;
+    }
+    
+    .progress-container {
+      width: 80%;
+      max-width: 300px;
+      margin-top: 10px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      color: rgba(255,255,255,0.8);
+      font-size: clamp(11px, 3vw, 12px);
+      margin-top: 6px;
+      text-align: center;
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: clamp(20px, 5vh, 40px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(51,51,51,0.95);
+      color: white;
+      padding: clamp(10px, 3vw, 14px) clamp(16px, 4vw, 24px);
+      border-radius: 30px;
+      font-size: clamp(12px, 3.2vw, 14px);
+      z-index: 10000;
+      display: none;
+      text-align: center;
+      max-width: 90%;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .toast.show { 
+      display: block; 
+      animation: toastAnim 3.5s ease forwards; 
+    }
+    @keyframes toastAnim {
+      0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    }
+    
+    #pdfContainer {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      width: 800px;
+      background: white;
+      z-index: -1;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    /* Prevent zoom on double tap for all interactive elements */
+    button, select, input, .btn-primary, .login-btn {
+      touch-action: manipulation;
+    }
+    
+    /* Prevent text selection */
+    * {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    /* Allow text selection in inputs */
+    input, select {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+  </style>
+</head>
+<body>
+  <div id="loginCard" class="login-card">
+    <div class="login-header">
+      <span class="login-icon">📋</span>
+      <h1>Report Card Generator</h1>
+      <p>Admin Access Only</p>
+    </div>
+    <div class="login-body">
+      <div class="input-group">
+        <label>📧 Email</label>
+        <input type="email" id="email" placeholder="admin@school.com" autocomplete="email">
+      </div>
+      <div class="input-group">
+        <label>🔒 Password</label>
+        <input type="password" id="password" placeholder="Enter password" autocomplete="current-password">
+      </div>
+      <button class="login-btn" onclick="doLogin()">➡ Login</button>
+      <div id="loginError" class="error"></div>
+    </div>
+  </div>
+
+  <div id="mainCard" class="main-card">
+    <div class="main-header">
+      <h2>📋 Generate Report Card</h2>
+    </div>
+    <div class="main-body">
+      <label>📚 Select Class</label>
+      <select id="classSelect" onchange="loadStudents()">
+        <option>-- Loading --</option>
+      </select>
+      
+      <label style="margin-top: clamp(8px, 2vw, 12px);">👨‍🎓 Select Student</label>
+      <select id="studentSelect">
+        <option>-- Select class first --</option>
+      </select>
+      
+      <div class="btn-group">
+        <button class="btn-primary" onclick="generateSingle()" id="generateBtn">📄 Generate & Save PDF</button>
+        <button class="btn-primary bulk" onclick="generateBulk()">📑 Generate All (Print)</button>
+      </div>
+      
+      <div class="info-note">
+        💡 PDF downloads directly to your device. No browser print dialog needed.
+      </div>
+    </div>
+  </div>
+
+  <div id="pdfContainer"></div>
+
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <p id="loadingText">Generating report...</p>
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">0%</div>
+    </div>
+  </div>
+  
+  <div id="toast" class="toast"></div>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      // ==================== CONFIGURATION ====================
+      const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyYJLAGlCl9bNXqoY3VPVuM4eUaywUvGJdyagpvxS4EokErlikm2fR23dvY7te_9yfC6w/exec';
+      
+      // Prevent zoom gestures
+      document.addEventListener('gesturestart', function(e) {
+        e.preventDefault();
+      });
+      
+      document.addEventListener('gesturechange', function(e) {
+        e.preventDefault();
+      });
+      
+      document.addEventListener('gestureend', function(e) {
+        e.preventDefault();
+      });
+      
+      // Prevent double tap zoom
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function(e) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+          e.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+      
+      // Prevent pinch zoom
+      document.addEventListener('touchmove', function(e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+      
+      let currentTabName = null;
+      let currentSchoolData = null;
+      let isGenerating = false;
+
+      // ==================== API CALLS ====================
+      
+      function apiCall(action, data, callback) {
+        const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        
+        let url = API_BASE_URL + '?action=' + encodeURIComponent(action);
+        for (let key in data) {
+          if (data.hasOwnProperty(key) && data[key] !== null && data[key] !== undefined) {
+            url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(data[key]));
+          }
+        }
+        url += '&callback=' + callbackName;
+        
+        console.log("API Call URL:", url);
+        
+        const script = document.createElement('script');
+        script.src = url;
+        
+        window[callbackName] = function(response) {
+          console.log("API Response for " + action + ":", response);
+          delete window[callbackName];
+          if (script.parentNode) script.remove();
+          callback(response);
+        };
+        
+        script.onerror = function() {
+          console.error("Script error for action:", action);
+          delete window[callbackName];
+          if (script.parentNode) script.remove();
+          callback({ success: false, error: 'Network error' });
+        };
+        
+        setTimeout(() => {
+          if (window[callbackName]) {
+            console.warn("Timeout for action:", action);
+            delete window[callbackName];
+            if (script.parentNode) script.remove();
+            callback({ success: false, error: 'Request timeout' });
+          }
+        }, 30000);
+        
+        document.body.appendChild(script);
+      }
+
+      // ==================== UI FUNCTIONS ====================
+
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.remove('show');
+        void toast.offsetWidth;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3500);
+      }
+
+      function showError(msg) {
+        const err = document.getElementById('loginError');
+        err.innerText = msg;
+        err.classList.add('show');
+        setTimeout(() => err.classList.remove('show'), 4000);
+      }
+
+      function showLoading(show, text) {
+        const loading = document.getElementById('loading');
+        loading.classList.toggle('show', show);
+        if (show && text) {
+          document.getElementById('loadingText').textContent = text;
+        }
+        if (!show) updateProgress(0);
+      }
+
+      function updateProgress(percent) {
+        const fill = document.getElementById('progressFill');
+        const text = document.getElementById('progressText');
+        const val = Math.min(Math.max(percent, 0), 100);
+        fill.style.width = val + '%';
+        text.textContent = Math.round(val) + '%';
+      }
+
+      // ==================== LOGIN - ADMIN ONLY ====================
+
+      function doLogin() {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+        
+        if (!email || !password) {
+          showError('Please enter email and password');
+          return;
+        }
+        
+        showError('Authenticating...');
+        
+        apiCall('verifyLogin', { email: email, password: password }, function(result) {
+          if (result && result.success) {
+            
+            // ============================================================
+            // CHECK FOR ADMIN ROLE - ONLY ADMIN CAN LOGIN
+            // ============================================================
+            const userRole = result.role ? result.role.toLowerCase().trim() : '';
+            
+            if (userRole !== 'admin') {
+              showError('❌ Access Denied! Only Admin users can login.');
+              return;
+            }
+            
+            // Admin login successful
+            currentTabName = result.tabName;
+            currentSchoolData = {
+              schoolName: result.schoolName || 'SCHOOL NAME',
+              schoolAddress: result.schoolAddress || '',
+              schoolContact: result.schoolContact || '',
+              schoolLogo: result.schoolLogo || '',
+              term: result.term || 'FIRST TERM'
+            };
+            
+            document.getElementById('loginCard').style.display = 'none';
+            document.getElementById('mainCard').style.display = 'block';
+            loadClasses();
+            showToast('✅ Welcome Admin: ' + email);
+            
+          } else {
+            showError(result?.message || 'Login failed');
+          }
+        });
+      }
+
+      // ==================== CLASSES & STUDENTS ====================
+
+      function loadClasses() {
+        apiCall('getClassNames', { tabName: currentTabName }, function(classes) {
+          const select = document.getElementById('classSelect');
+          select.innerHTML = '<option value="">-- Select Class --</option>';
+          if (classes && classes.length > 0) {
+            classes.forEach(function(c) {
+              const opt = document.createElement('option');
+              opt.value = c;
+              opt.textContent = c;
+              select.appendChild(opt);
+            });
+          }
+        });
+      }
+
+      function loadStudents() {
+        const className = document.getElementById('classSelect').value;
+        if (!className) {
+          document.getElementById('studentSelect').innerHTML = '<option>-- Select class first --</option>';
+          return;
+        }
+        
+        apiCall('getStudentsByClass', { 
+          tabName: currentTabName, 
+          className: className 
+        }, function(students) {
+          const select = document.getElementById('studentSelect');
+          select.innerHTML = '<option value="">-- Select Student --</option>';
+          if (students && students.length > 0) {
+            students.forEach(function(s) {
+              const opt = document.createElement('option');
+              opt.value = s.roll;
+              opt.textContent = s.roll + ' - ' + s.name;
+              select.appendChild(opt);
+            });
+          }
+        });
+      }
+
+      // ==================== PDF GENERATION ====================
+
+      async function generatePDFDirectly(htmlContent, studentName) {
+        if (isGenerating) return;
+        isGenerating = true;
+        
+        const btn = document.getElementById('generateBtn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Generating...';
+        
+        try {
+          showLoading(true, 'Preparing report card...');
+          updateProgress(5);
+          
+          const container = document.getElementById('pdfContainer');
+          container.innerHTML = '';
+          container.innerHTML = htmlContent;
+          
+          await new Promise(function(resolve) { setTimeout(resolve, 800); });
+          updateProgress(15);
+          
+          const reportElement = container.querySelector('.report-card');
+          if (!reportElement) {
+            throw new Error('Report card element not found');
+          }
+          
+          showLoading(true, 'Loading images...');
+          updateProgress(25);
+          
+          const images = reportElement.querySelectorAll('img');
+          for (let i = 0; i < images.length; i++) {
+            const img = images[i];
+            if (!img.complete) {
+              await new Promise(function(resolve) {
+                img.onload = resolve;
+                img.onerror = function() { resolve(); };
+                setTimeout(resolve, 2000);
+              });
+            }
+          }
+          
+          updateProgress(40);
+          showLoading(true, 'Capturing report card...');
+          
+          if (typeof html2canvas === 'undefined') {
+            throw new Error('html2canvas library not loaded');
+          }
+          
+          const canvas = await html2canvas(reportElement, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            logging: false,
+            useCORS: true,
+            allowTaint: false
+          });
+          
+          updateProgress(65);
+          showLoading(true, 'Generating PDF...');
+          
+          if (typeof window.jspdf === 'undefined') {
+            throw new Error('jsPDF library not loaded');
+          }
+          
+          const { jsPDF } = window.jspdf;
+          const imgWidth = 210;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          const maxHeight = 297;
+          
+          const pdf = new jsPDF({
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait',
+            compress: true
+          });
+          
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          
+          if (imgHeight <= maxHeight) {
+            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+          } else {
+            let remainingHeight = imgHeight;
+            let yOffset = 0;
+            let pageNum = 1;
+            
+            while (remainingHeight > 0) {
+              if (pageNum > 1) pdf.addPage();
+              
+              const portionHeight = Math.min(maxHeight, remainingHeight);
+              const yRatio = yOffset / imgHeight;
+              const heightRatio = portionHeight / imgHeight;
+              
+              const cropCanvas = document.createElement('canvas');
+              cropCanvas.width = canvas.width;
+              cropCanvas.height = canvas.height * heightRatio;
+              const ctx = cropCanvas.getContext('2d');
+              
+              ctx.drawImage(
+                canvas,
+                0, canvas.height * yRatio,
+                canvas.width, canvas.height * heightRatio,
+                0, 0,
+                canvas.width, canvas.height * heightRatio
+              );
+              
+              const cropData = cropCanvas.toDataURL('image/jpeg', 0.95);
+              pdf.addImage(cropData, 'JPEG', 0, 0, imgWidth, portionHeight);
+              
+              remainingHeight -= portionHeight;
+              yOffset += portionHeight;
+              pageNum++;
+            }
+          }
+          
+          updateProgress(85);
+          showLoading(true, 'Saving PDF...');
+          
+          const pdfBlob = pdf.output('blob');
+          const fileName = 'Report_Card_' + studentName.replace(/\s/g, '_') + '.pdf';
+          
+          let downloadSuccess = false;
+          
+          try {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(pdfBlob);
+            link.download = fileName;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(function() {
+              document.body.removeChild(link);
+              URL.revokeObjectURL(link.href);
+            }, 100);
+            downloadSuccess = true;
+          } catch (e) {
+            if (window.navigator && window.navigator.msSaveBlob) {
+              try {
+                window.navigator.msSaveBlob(pdfBlob, fileName);
+                downloadSuccess = true;
+              } catch (e2) {}
+            }
+          }
+          
+          if (!downloadSuccess) {
+            const url = URL.createObjectURL(pdfBlob);
+            const win = window.open(url, '_blank');
+            if (win) {
+              setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+              downloadSuccess = true;
+            }
+          }
+          
+          updateProgress(100);
+          container.innerHTML = '';
+          showLoading(false);
+          btn.disabled = false;
+          btn.textContent = '📄 Generate & Save PDF';
+          isGenerating = false;
+          
+          if (downloadSuccess) {
+            showToast('✅ PDF downloaded: ' + fileName);
+          } else {
+            showToast('⚠️ PDF created but download failed');
+          }
+          
+        } catch (error) {
+          console.error('PDF generation error:', error);
+          showLoading(false);
+          btn.disabled = false;
+          btn.textContent = '📄 Generate & Save PDF';
+          isGenerating = false;
+          showToast('❌ Error: ' + error.message);
+          
+          try {
+            const win = window.open('', '_blank');
+            if (win) {
+              win.document.write(htmlContent);
+              win.document.close();
+              showToast('💡 Use browser menu to save as PDF');
+            }
+          } catch (e) {}
+        }
+      }
+
+      // ==================== GENERATE FUNCTIONS ====================
+
+      function generateSingle() {
+        const className = document.getElementById('classSelect').value;
+        const roll = document.getElementById('studentSelect').value;
+        
+        if (!className || !roll) {
+          showToast('⚠️ Please select class and student');
+          return;
+        }
+        
+        if (isGenerating) return;
+        
+        const btn = document.getElementById('generateBtn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Loading...';
+        
+        showLoading(true, 'Fetching student data...');
+        updateProgress(2);
+        
+        apiCall('generateReportAsHtml', {
+          tabName: currentTabName,
+          className: className,
+          roll: roll,
+          schoolData: currentSchoolData
+        }, async function(result) {
+          if (result && result.success) {
+            await generatePDFDirectly(result.html, result.studentName);
+          } else {
+            showLoading(false);
+            showToast('❌ Error: ' + (result?.error || 'Unknown error'));
+            btn.disabled = false;
+            btn.textContent = '📄 Generate & Save PDF';
+          }
+        });
+      }
+
+      function generateBulk() {
+        const className = document.getElementById('classSelect').value;
+        if (!className) {
+          showToast('⚠️ Please select a class');
+          return;
+        }
+        if (!confirm('Generate reports for ALL students?')) return;
+        
+        showLoading(true, 'Generating all reports...');
+        
+        apiCall('generateBulkReports', {
+          tabName: currentTabName,
+          className: className,
+          schoolData: currentSchoolData
+        }, function(result) {
+          showLoading(false);
+          if (result && result.success) {
+            const win = window.open('', '_blank');
+            if (win) {
+              win.document.write(result.html);
+              win.document.close();
+              setTimeout(function() {
+                win.print();
+                showToast('💡 Use "Save as PDF" in print dialog');
+              }, 800);
+            } else {
+              showToast('⚠️ Please allow popups');
+            }
+          } else {
+            showToast('❌ Error: ' + (result?.error || 'Unknown error'));
+          }
+        });
+      }
+
+      // ==================== EVENT LISTENERS ====================
+
+      // Enter key for login
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          const loginCard = document.getElementById('loginCard');
+          if (loginCard.style.display !== 'none') {
+            doLogin();
+          }
+        }
+      });
+
+      // Check libraries on load
+      window.addEventListener('load', function() {
+        if (typeof html2canvas === 'undefined') {
+          showToast('⚠️ html2canvas failed to load');
+        }
+        if (typeof window.jspdf === 'undefined') {
+          showToast('⚠️ jsPDF failed to load');
+        }
+      });
+
+      // Expose functions globally
+      window.doLogin = doLogin;
+      window.loadStudents = loadStudents;
+      window.generateSingle = generateSingle;
+      window.generateBulk = generateBulk;
+
+    })();
+  </script>
+</body>
+</html>
