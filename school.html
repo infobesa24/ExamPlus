@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>School Details Manager</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background: #f5f7fb;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, sans-serif;
+      background: #f5f7fb;
+      min-height: 100vh;
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    /* ===== VIBRATING ICON WRAPPER ===== */
+    .icon-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 80vh;
+    }
+
+    .vibrating-icon {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #1a6d8f, #0e5270);
+      box-shadow: 
+        0 12px 28px rgba(0, 0, 0, 0.6),
+        0 0 0 4px rgba(255, 255, 255, 0.08),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 4px 8px rgba(255, 255, 255, 0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      animation: vibrate 2.4s infinite ease-in-out, glowPulse 3.2s infinite alternate;
+      color: white;
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: 0.03em;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      line-height: 1.2;
+      padding: 16px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+    }
+
+    .vibrating-icon .ripple {
+      position: absolute;
+      border-radius: 50%;
+      border: 3px solid rgba(26, 109, 143, 0.3);
+      animation: rippleEffect 2s ease-out infinite;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .vibrating-icon .ripple:nth-child(2) {
+      animation-delay: 0.7s;
+    }
+
+    @keyframes rippleEffect {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.4);
+        opacity: 0;
+      }
+    }
+
+    @keyframes vibrate {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      10% { transform: translate(-2px, -2px) rotate(-0.6deg); }
+      20% { transform: translate(2px, -1px) rotate(0.8deg); }
+      30% { transform: translate(-1px, 2px) rotate(-0.4deg); }
+      40% { transform: translate(1px, -2px) rotate(0.6deg); }
+      50% { transform: translate(-2px, 1px) rotate(-0.8deg); }
+      60% { transform: translate(2px, 2px) rotate(0.4deg); }
+      70% { transform: translate(-1px, -1px) rotate(-0.3deg); }
+      80% { transform: translate(1px, 1px) rotate(0.3deg); }
+      90% { transform: translate(-1px, 1px) rotate(-0.2deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    @keyframes glowPulse {
+      0% { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(255, 255, 255, 0.06), inset 0 -4px 8px rgba(0, 0, 0, 0.3), inset 0 4px 8px rgba(255, 255, 255, 0.12); }
+      100% { box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 6px rgba(255, 255, 255, 0.12), inset 0 -4px 8px rgba(0, 0, 0, 0.4), inset 0 4px 8px rgba(255, 255, 255, 0.18); }
+    }
+
+    .vibrating-icon:active {
+      transform: scale(0.92);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8), 0 0 0 4px rgba(255, 255, 255, 0.15);
+      animation: none;
+      transition: transform 0.06s;
+    }
+
+    @media (max-width: 480px) {
+      .vibrating-icon {
+        width: 150px;
+        height: 150px;
+        font-size: 1rem;
+        padding: 12px;
+      }
+    }
+    @media (max-width: 360px) {
+      .vibrating-icon {
+        width: 130px;
+        height: 130px;
+        font-size: 0.85rem;
+        padding: 10px;
+      }
+    }
+
+    /* ===== ADMIN BADGE ===== */
+    .admin-badge {
+      display: inline-block;
+      background: rgba(220, 53, 69, 0.15);
+      color: #ff6b6b;
+      padding: 4px 16px;
+      border-radius: 30px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: 1px solid rgba(220, 53, 69, 0.2);
+      margin-bottom: 16px;
+    }
+    
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 85vh;
+      padding: 12px;
+    }
+    
+    .login-box {
+      background: #ffffff;
+      padding: 32px 24px 44px;
+      border-radius: 48px;
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.08);
+      border: 1px solid #eef2f8;
+    }
+    
+    .login-box h2 {
+      color: #1e3c2c;
+      margin-bottom: 6px;
+      font-weight: 800;
+      font-size: 2rem;
+      letter-spacing: -0.5px;
+    }
+
+    .login-box .sub {
+      color: #5588a7;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+    
+    .login-box input {
+      width: 100%;
+      padding: 16px 20px;
+      margin: 14px 0;
+      border: 2px solid #e2e8f0;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 500;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      outline: none;
+      color: #1e2a3a;
+    }
+    
+    .login-box input:focus {
+      border-color: #0f9d58;
+      box-shadow: 0 0 0 4px rgba(15, 157, 88, 0.12);
+    }
+    
+    .login-box input::placeholder {
+      color: #9aaec2;
+      font-weight: 450;
+      font-size: 0.9rem;
+    }
+    
+    .login-box button {
+      width: 100%;
+      padding: 16px 20px;
+      margin-top: 20px;
+      background: #0f9d58;
+      color: white;
+      border: none;
+      border-radius: 60px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 3px 8px rgba(15, 157, 88, 0.2);
+    }
+    
+    .login-box button:active {
+      transform: scale(0.97);
+      background: #0b7e48;
+    }
+    
+    .login-box button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .login-box .error {
+      margin-top: 20px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      background: #fef2f2;
+      padding: 10px 18px;
+      border-radius: 60px;
+      color: #dc3545;
+      display: inline-block;
+      width: 100%;
+      display: none;
+    }
+    
+    .login-box .error.show {
+      display: block;
+    }
+    
+    .secure-badge {
+      margin-top: 32px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.7rem;
+      color: #5a6874;
+      border-top: 1px solid #eef2f8;
+      padding-top: 28px;
+      flex-wrap: wrap;
+    }
+    
+    .secure-badge span {
+      background: #f8fafc;
+      padding: 8px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.7rem;
+    }
+    
+    .container {
+      max-width: 700px;
+      width: 100%;
+      margin: 0 auto;
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      border: 1px solid #eef2f8;
+      display: none;
+    }
+    
+    .header {
+      background: #f8fafc;
+      padding: 16px 20px;
+      text-align: center;
+      border-bottom: 1px solid #eef2f8;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #1e3c2c;
+    }
+    
+    .school-badge {
+      background: #e8f5e9;
+      padding: 8px 16px;
+      border-radius: 40px;
+      display: inline-block;
+      margin: 0 auto;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #2e7d32;
+    }
+    
+    .logout-btn {
+      background: #f8fafc;
+      color: #dc3545;
+      border: 1px solid #e2e8f0;
+      padding: 8px 20px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.8rem;
+      transition: 0.2s;
+      align-self: flex-end;
+    }
+    
+    .logout-btn:active {
+      transform: scale(0.96);
+    }
+    
+    .form-container {
+      padding: 24px 20px 32px;
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1e3c2c;
+      font-size: 0.85rem;
+    }
+    
+    label .required {
+      color: #dc3545;
+    }
+    
+    input, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 32px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      background: #ffffff;
+    }
+    
+    textarea {
+      border-radius: 24px;
+      resize: vertical;
+    }
+    
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #0f9d58;
+      box-shadow: 0 0 0 3px rgba(15, 157, 88, 0.1);
+    }
+    
+    .camera-section {
+      background: #f8fafc;
+      border-radius: 28px;
+      padding: 20px 16px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .camera-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    
+    .btn-camera {
+      background: #0f9d58;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: 0.2s;
+      flex: 1;
+      min-width: 100px;
+    }
+    
+    .btn-camera:active {
+      transform: scale(0.96);
+    }
+    
+    .btn-retake {
+      background: #dc3545;
+    }
+    
+    .btn-submit {
+      width: 100%;
+      padding: 14px 20px;
+      background: #0f9d58;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: 0.2s;
+    }
+    
+    .btn-submit:active {
+      transform: scale(0.97);
+    }
+    
+    .btn-submit:disabled {
+      background: #9aaec2;
+      cursor: not-allowed;
+    }
+    
+    .image-preview {
+      margin-top: 16px;
+      text-align: center;
+    }
+    
+    .image-preview img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid #0f9d58;
+      object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .message {
+      margin-top: 20px;
+      padding: 12px 18px;
+      border-radius: 60px;
+      text-align: center;
+      display: none;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      display: block;
+    }
+    
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .loading.active {
+      display: block;
+    }
+    
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #0f9d58;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .preview-card {
+      background: #f8fafc;
+      border-radius: 32px;
+      padding: 24px 20px;
+      margin-top: 32px;
+      text-align: center;
+      border: 1px solid #eef2f8;
+    }
+    
+    .preview-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: #1e3c2c;
+      font-weight: 800;
+    }
+    
+    .preview-school-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 12px auto;
+      display: block;
+      border: 3px solid #0f9d58;
+    }
+    
+    .preview-school-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #1e3c2c;
+      margin: 12px 0 6px;
+      word-break: break-word;
+    }
+    
+    .preview-card div:not(.preview-school-name) {
+      font-size: 0.8rem;
+      margin: 8px 0;
+      color: #4a5568;
+      font-weight: 500;
+    }
+    
+    .passport-note {
+      background: #e8f5e9;
+      padding: 8px 12px;
+      border-radius: 40px;
+      margin-top: 16px;
+      font-size: 0.7rem;
+      color: #1e3c2c;
+      font-weight: 600;
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      .login-box {
+        padding: 28px 20px 36px;
+        border-radius: 40px;
+      }
+      .login-box h2 {
+        font-size: 1.7rem;
+        margin-bottom: 22px;
+      }
+      .login-box input {
+        padding: 14px 16px;
+        font-size: 0.9rem;
+      }
+      .login-box button {
+        padding: 14px 18px;
+        font-size: 1rem;
+      }
+      .form-container {
+        padding: 20px 16px 28px;
+      }
+    }
+    
+    button, .logout-btn, .btn-camera, .btn-submit {
+      touch-action: manipulation;
+      cursor: pointer;
+    }
+
+    /* close button for login overlay */
+    .close-login {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      color: white;
+      font-size: 32px;
+      font-weight: 300;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      background: rgba(255,255,255,0.1);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .close-login:hover { background: rgba(255,255,255,0.2); }
+    .close-login:active { transform: scale(0.92); }
+
+    /* login overlay (for icon -> login transition) */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 20px;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .login-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .login-overlay .login-box {
+      animation: floatIn 0.4s ease;
+    }
+
+    @keyframes floatIn {
+      0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== VIBRATING ICON (entry point) ===== -->
+<div class="icon-wrapper" id="iconWrapper">
+  <div class="vibrating-icon" id="launcherIcon" role="button" aria-label="School Details Manager">
+    <span class="ripple"></span>
+    <span class="ripple"></span>
+    School<br />Details
+  </div>
+</div>
+
+<!-- ===== LOGIN OVERLAY (shown after icon click) ===== -->
+<div class="login-overlay" id="loginOverlay">
+  <span class="close-login" id="closeLoginBtn">✕</span>
+  <div class="login-box">
+    <div class="admin-badge">🔐 Admin Only</div>
+    <h2>School Details</h2>
+    <div class="sub">Secure admin access to manage school information</div>
+    
+    <input type="email" id="email" placeholder="Email address" autocomplete="email" inputmode="email">
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+    <button onclick="doLogin()" id="loginBtn">→ Login To Access ←</button>
+    <div id="loginError" class="error"></div>
+    <div class="secure-badge">
+      <span>✓ Secure Login</span>
+      <span>🏫 School Management</span>
+      <span>🔐 Encrypted</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="appSection" class="container">
+  <div class="header">
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+    <h1>🏫 School Details Management</h1>
+    <div class="school-badge" id="schoolTabBadge"></div>
+  </div>
+  
+  <div class="form-container">
+    <div class="camera-section">
+      <label>🏆 SCHOOL LOGO</label>
+      <div class="camera-buttons">
+        <button type="button" class="btn-camera" onclick="triggerLogoUpload()">📁 Upload Logo</button>
+        <button type="button" class="btn-camera btn-retake" onclick="clearLogo()">🗑️ Clear Logo</button>
+      </div>
+      <input type="file" id="logoUpload" accept="image/*" style="display: none;" onchange="handleLogoUpload(this)">
+      <div id="logoPreview" class="image-preview" style="display:none;">
+        <img id="schoolLogo" alt="School Logo">
+        <input type="hidden" id="logoDataUrl" value="">
+      </div>
+      <div class="passport-note">✅ Upload school logo (resized to 200x200, max 2MB)</div>
+    </div>
+    
+    <div class="form-group">
+      <label>🏛️ SCHOOL NAME <span class="required">*</span></label>
+      <input type="text" id="schoolName" placeholder="Enter school name">
+    </div>
+    
+    <div class="form-group">
+      <label>📍 ADDRESS <span class="required">*</span></label>
+      <textarea id="address" rows="3" placeholder="Enter school address"></textarea>
+    </div>
+    
+    <div class="form-group">
+      <label>📞 CONTACT <span class="required">*</span></label>
+      <input type="text" id="contact" placeholder="Phone number / Email address" inputmode="tel">
+    </div>
+    
+    <div class="form-group">
+      <label>📅 TERM / SESSION <span class="required">*</span></label>
+      <input type="text" id="term" placeholder="e.g., First Term 2024">
+    </div>
+    
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p style="margin-top: 12px;">Saving school details...</p>
+    </div>
+    
+    <div class="message" id="message"></div>
+    
+    <button class="btn-submit" onclick="saveSchoolDetails()">💾 Save School Details</button>
+    
+    <div class="preview-card">
+      <h3>📋 Preview</h3>
+      <img id="previewLogo" class="preview-school-logo" src="" alt="Logo" style="display:none;">
+      <div class="preview-school-name" id="previewName">School Name</div>
+      <div id="previewAddress">Address</div>
+      <div id="previewContact">Contact</div>
+      <div id="previewTerm">Term / Session</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ==================== CONFIGURATION ====================
+  const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbzUtnrt8WRAXeOFpoR_LJjNcpm3TPRTpnSWBXSSKidwZv9DBb-HFoOQiTLxl9Vio4c58A/exec';
+  
+  // ==================== STATE ====================
+  let currentTabName = null;
+  let currentRowIndex = null;
+  const LOGO_SIZE = 200;
+  
+  // ==================== ICON LOGIC ====================
+  function showLoginOverlay() {
+    document.getElementById('loginOverlay').classList.add('active');
+    if (navigator.vibrate) navigator.vibrate(10);
+    setTimeout(() => document.getElementById('email').focus(), 300);
+  }
+
+  function hideLoginOverlay() {
+    document.getElementById('loginOverlay').classList.remove('active');
+    document.getElementById('loginError').className = 'error';
+    document.getElementById('loginError').style.display = 'none';
+  }
+
+  // ==================== API CALLS ====================
+  
+  function apiCall(action, data, callback) {
+    const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    
+    let url = API_BASE_URL + '?action=' + encodeURIComponent(action);
+    for (let key in data) {
+      if (data.hasOwnProperty(key) && data[key] !== null && data[key] !== undefined) {
+        let value = data[key];
+        if (typeof value === 'string' && value.length > 1000) {
+          console.log("Large data detected for key:", key, "length:", value.length);
+        }
+        url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(value));
+      }
+    }
+    url += '&callback=' + callbackName;
+    
+    console.log("API Call URL length:", url.length);
+    
+    const script = document.createElement('script');
+    script.src = url;
+    
+    window[callbackName] = function(response) {
+      console.log("API Response for " + action + ":", response);
+      delete window[callbackName];
+      if (script.parentNode) script.remove();
+      callback(response);
+    };
+    
+    script.onerror = function() {
+      console.error("Script error for action:", action);
+      delete window[callbackName];
+      if (script.parentNode) script.remove();
+      callback({ success: false, error: 'Network error' });
+    };
+    
+    setTimeout(() => {
+      if (window[callbackName]) {
+        console.warn("Timeout for action:", action);
+        delete window[callbackName];
+        if (script.parentNode) script.remove();
+        callback({ success: false, error: 'Request timeout' });
+      }
+    }, 30000);
+    
+    document.body.appendChild(script);
+  }
+  
+  // ==================== UI FUNCTIONS ====================
+  
+  function showMessage(msg, type) {
+    const div = document.getElementById("message");
+    div.textContent = msg;
+    div.className = "message " + type;
+    div.style.display = "block";
+    setTimeout(() => {
+      div.style.display = "none";
+    }, 5000);
+  }
+  
+  function escapeHtml(t) {
+    if (!t) return '';
+    return String(t).replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&';
+      if (m === '<') return '<';
+      if (m === '>') return '>';
+      return m;
+    });
+  }
+  
+  // ==================== LOGIN ====================
+  
+  function doLogin() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const errorDiv = document.getElementById("loginError");
+    const loginBtn = document.getElementById("loginBtn");
+    
+    if (!email || !password) {
+      errorDiv.innerText = "Please enter email and password";
+      errorDiv.className = "error show";
+      return;
+    }
+    
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Authenticating...";
+    errorDiv.className = "error";
+    errorDiv.style.display = "none";
+    
+    apiCall('loginUser', { email: email, password: password }, function(result) {
+      console.log("Login result:", result);
+      
+      loginBtn.disabled = false;
+      loginBtn.textContent = "→ Login To Access ←";
+      
+      if (result && result.success) {
+        const role = result.role ? result.role.toUpperCase() : '';
+        
+        if (role === 'ADMIN') {
+          currentTabName = result.tabName;
+          currentRowIndex = result.rowIndex;
+          
+          document.getElementById("loginOverlay").classList.remove('active');
+          document.getElementById("iconWrapper").style.display = "none";
+          document.getElementById("appSection").style.display = "block";
+          document.getElementById("schoolTabBadge").innerHTML = "🏫 School: " + escapeHtml(currentTabName);
+          errorDiv.className = "error";
+          errorDiv.style.display = "none";
+          
+          loadSchoolDetails();
+        } else {
+          errorDiv.innerText = "Access Denied. Only ADMIN users can access this portal.";
+          errorDiv.className = "error show";
+          errorDiv.style.background = "#fff0f0";
+          errorDiv.style.color = "#dc3545";
+        }
+        
+      } else {
+        errorDiv.innerText = result?.error || "Login failed. Please verify credentials.";
+        errorDiv.className = "error show";
+      }
+    });
+  }
+  
+  function doLogout() {
+    currentTabName = null;
+    currentRowIndex = null;
+    document.getElementById("appSection").style.display = "none";
+    document.getElementById("iconWrapper").style.display = "flex";
+    document.getElementById("loginOverlay").classList.remove('active');
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("loginError").className = "error";
+    document.getElementById("loginError").style.display = "none";
+    resetForm();
+  }
+  
+  // ==================== SCHOOL DETAILS ====================
+  
+  function loadSchoolDetails() {
+    apiCall('getSchoolDetails', {
+      tabName: currentTabName,
+      rowIndex: currentRowIndex
+    }, function(data) {
+      console.log("School details:", data);
+      
+      if (data && data.error) {
+        showMessage("Error loading: " + data.error, "error");
+        return;
+      }
+      
+      if (data) {
+        if (data.logo && data.logo.startsWith('data:image')) {
+          document.getElementById("schoolLogo").src = data.logo;
+          document.getElementById("logoPreview").style.display = "block";
+          document.getElementById("logoDataUrl").value = data.logo;
+          document.getElementById("previewLogo").src = data.logo;
+          document.getElementById("previewLogo").style.display = "block";
+        }
+        if (data.name) {
+          document.getElementById("schoolName").value = data.name;
+          document.getElementById("previewName").innerText = data.name;
+        }
+        if (data.address) {
+          document.getElementById("address").value = data.address;
+          document.getElementById("previewAddress").innerText = data.address;
+        }
+        if (data.contact) {
+          document.getElementById("contact").value = data.contact;
+          document.getElementById("previewContact").innerText = data.contact;
+        }
+        if (data.term) {
+          document.getElementById("term").value = data.term;
+          document.getElementById("previewTerm").innerText = data.term;
+        }
+      }
+    });
+  }
+  
+  function triggerLogoUpload() {
+    document.getElementById("logoUpload").click();
+  }
+  
+  function handleLogoUpload(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (file.size > 2 * 1024 * 1024) {
+        showMessage("Logo too large! Max 2MB.", "error");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        resizeToLogoSize(e.target.result, function(logoDataUrl) {
+          document.getElementById("logoDataUrl").value = logoDataUrl;
+          document.getElementById("schoolLogo").src = logoDataUrl;
+          document.getElementById("logoPreview").style.display = "block";
+          document.getElementById("previewLogo").src = logoDataUrl;
+          document.getElementById("previewLogo").style.display = "block";
+          showMessage("Logo loaded! Click Save to save.", "success");
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  
+  function resizeToLogoSize(imageDataUrl, callback) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = LOGO_SIZE;
+      canvas.height = LOGO_SIZE;
+      const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+      const x = (canvas.width - img.width * scale) / 2;
+      const y = (canvas.height - img.height * scale) / 2;
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      callback(compressedDataUrl);
+    };
+    img.src = imageDataUrl;
+  }
+  
+  function clearLogo() {
+    document.getElementById("logoDataUrl").value = "";
+    document.getElementById("logoPreview").style.display = "none";
+    document.getElementById("schoolLogo").src = "";
+    document.getElementById("previewLogo").style.display = "none";
+    document.getElementById("previewLogo").src = "";
+  }
+  
+  // ==================== SAVE ====================
+  
+  function saveSchoolDetails() {
+    const name = document.getElementById("schoolName").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const contact = document.getElementById("contact").value.trim();
+    const term = document.getElementById("term").value.trim();
+    const logo = document.getElementById("logoDataUrl").value;
+    
+    if (!name) { showMessage("Please enter school name", "error"); return; }
+    if (!address) { showMessage("Please enter school address", "error"); return; }
+    if (!contact) { showMessage("Please enter school contact", "error"); return; }
+    if (!term) { showMessage("Please enter term/session", "error"); return; }
+    
+    document.getElementById("loading").classList.add("active");
+    const btn = document.querySelector(".btn-submit");
+    btn.disabled = true;
+    
+    let finalLogo = logo;
+    if (logo && logo.startsWith('data:image')) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 100;
+        canvas.height = 100;
+        ctx.drawImage(img, 0, 0, 100, 100);
+        finalLogo = canvas.toDataURL('image/jpeg', 0.5);
+        doSave(finalLogo);
+      };
+      img.src = logo;
+    } else {
+      doSave(finalLogo);
+    }
+    
+    function doSave(compressedLogo) {
+      const schoolData = {
+        logo: compressedLogo || "",
+        name: name,
+        address: address,
+        contact: contact,
+        term: term
+      };
+      
+      console.log("Saving to row:", currentRowIndex);
+      console.log("Data size:", JSON.stringify(schoolData).length);
+      
+      apiCall('saveSchoolDetails', {
+        tabName: currentTabName,
+        rowIndex: currentRowIndex,
+        schoolData: schoolData
+      }, function(result) {
+        document.getElementById("loading").classList.remove("active");
+        btn.disabled = false;
+        
+        console.log("Save result:", result);
+        
+        if (result && result.success) {
+          showMessage(result.message || "✅ School details saved successfully!", "success");
+          document.getElementById("previewName").innerText = name;
+          document.getElementById("previewAddress").innerText = address;
+          document.getElementById("previewContact").innerText = contact;
+          document.getElementById("previewTerm").innerText = term;
+          if (compressedLogo) {
+            document.getElementById("previewLogo").src = compressedLogo;
+            document.getElementById("previewLogo").style.display = "block";
+          }
+          setTimeout(loadSchoolDetails, 1500);
+        } else {
+          showMessage("Save failed: " + (result?.message || "Unknown error"), "error");
+        }
+      });
+    }
+  }
+  
+  function resetForm() {
+    document.getElementById("schoolName").value = "";
+    document.getElementById("address").value = "";
+    document.getElementById("contact").value = "";
+    document.getElementById("term").value = "";
+    clearLogo();
+    document.getElementById("previewName").innerText = "School Name";
+    document.getElementById("previewAddress").innerText = "Address";
+    document.getElementById("previewContact").innerText = "Contact";
+    document.getElementById("previewTerm").innerText = "Term / Session";
+    document.getElementById("message").className = "message";
+    document.getElementById("message").style.display = "none";
+  }
+
+  // ==================== EVENT LISTENERS ====================
+  document.getElementById("launcherIcon").addEventListener("click", showLoginOverlay);
+  document.getElementById("closeLoginBtn").addEventListener("click", hideLoginOverlay);
+
+  document.getElementById("loginOverlay").addEventListener("click", function(e) {
+    if (e.target === this) hideLoginOverlay();
+  });
+
+  document.getElementById("password").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") doLogin();
+  });
+
+  window.addEventListener('load', function() {
+    document.getElementById('iconWrapper').style.display = 'flex';
+    document.getElementById('appSection').style.display = 'none';
+    document.getElementById('loginOverlay').classList.remove('active');
+  });
+</script>
+</body>
+</html>
