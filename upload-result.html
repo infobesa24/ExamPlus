@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Student Marks Manager - School Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e8f0f7 0%, #d4e2ed 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== FULLSCREEN LOGIN CONTAINER - MOBILE OPTIMIZED ========== */
+        .login-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 30%, #0b2b3f, #071a24);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(2px);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 48px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 460px;
+            text-align: center;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.3);
+            animation: floatIn 0.5s ease;
+        }
+
+        @media (max-width: 560px) {
+            .login-card {
+                border-radius: 36px;
+                padding: 32px 24px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .login-card {
+                border-radius: 28px;
+                padding: 28px 20px;
+            }
+        }
+
+        @keyframes floatIn {
+            0% { opacity: 0; transform: scale(0.96) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .login-card h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(125deg, #0f5c7a, #1d8fbb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+
+        @media (min-width: 640px) {
+            .login-card h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        .login-card .sub {
+            color: #5588a7;
+            font-size: 0.85rem;
+            margin-bottom: 28px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #1c6a8f;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #d4e3ef;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #1f8fc7;
+            box-shadow: 0 0 0 4px rgba(31, 143, 199, 0.15);
+        }
+        .input-group input::placeholder {
+            color: #a8c0d0;
+            font-size: 0.85rem;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(95deg, #1a6d8f, #0e5270);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        .login-btn:active {
+            transform: scale(0.97);
+        }
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-msg {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 16px;
+            background: #fff0f0;
+            border-radius: 40px;
+            padding: 10px 16px;
+            display: none;
+        }
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ========== MAIN APP CONTAINER - RESPONSIVE ========== */
+        .app-container {
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 16px;
+            display: none;
+        }
+        @media (min-width: 768px) {
+            .app-container {
+                padding: 24px;
+            }
+        }
+        .header-area { margin-bottom: 20px; }
+        .header-area h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1a5d7a, #2c9bcf);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        @media (min-width: 640px) {
+            .header-area h1 { font-size: 1.6rem; }
+        }
+        .school-badge {
+            background: linear-gradient(135deg, #1a5d7a, #2c9bcf);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        .user-info-bar {
+            background: white;
+            border-radius: 48px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border: 1px solid #e2edf7;
+        }
+        .user-details { font-size: 0.75rem; font-weight: 500; color: #2c6f91; word-break: break-word; }
+        .logout-btn {
+            background: #dc3545;
+            padding: 8px 24px;
+            font-size: 0.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            color: white;
+            touch-action: manipulation;
+        }
+        .logout-btn:active { transform: scale(0.96); }
+        .card-control {
+            background: white;
+            border-radius: 36px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+            border: 1px solid #e9f1f8;
+        }
+        @media (min-width: 768px) {
+            .card-control {
+                padding: 24px 28px;
+                gap: 20px;
+            }
+        }
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 160px;
+            flex: 1;
+        }
+        .field-group label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #2c6f91;
+        }
+        select, button {
+            padding: 11px 16px;
+            border-radius: 32px;
+            font-weight: 600;
+            background: white;
+            border: 1px solid #cde0ec;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        button {
+            background: #1f6e93;
+            color: white;
+            border: none;
+            touch-action: manipulation;
+        }
+        button:active { transform: scale(0.97); }
+        .btn-outline {
+            background: white;
+            color: #1f6e93;
+            border: 1px solid #1f6e93;
+        }
+        .action-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .status-bar {
+            background: #e8f1f8;
+            border-radius: 60px;
+            padding: 10px 18px;
+            margin-bottom: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #1d6f94;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        @media (min-width: 640px) {
+            .status-bar { font-size: 0.8rem; }
+        }
+        .status-bar.error { background: #ffe0e0; color: #c0392b; }
+        .status-bar.success { background: #d4edda; color: #155724; }
+        .status-bar.warning { background: #fff3cd; color: #856404; }
+        .sync-indicator {
+            font-size: 0.65rem;
+            background: rgba(0,0,0,0.05);
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .table-wrapper {
+            background: white;
+            border-radius: 28px;
+            overflow-x: auto;
+            border: 1px solid #e6eff8;
+            margin-bottom: 20px;
+            padding: 8px 6px;
+        }
+        .marks-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            min-width: 420px;
+            table-layout: fixed;
+        }
+        .marks-table th {
+            background: #fafeff;
+            padding: 10px 8px;
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: #1b5a7c;
+            border-bottom: 2px solid #d4e3ef;
+            text-align: center;
+        }
+        .marks-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #f0f6fc;
+            text-align: center;
+            vertical-align: middle;
+        }
+        /* Column widths - with more space for student name */
+        .marks-table .col-roll { width: 10%; }
+        .marks-table .col-name { width: 38%; }
+        .marks-table .col-test1 { width: 16%; }
+        .marks-table .col-test2 { width: 16%; }
+        .marks-table .col-exam { width: 20%; }
+        
+        .marks-table .student-name {
+            text-align: left;
+            font-weight: 500;
+            font-size: 0.78rem;
+            padding-left: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .marks-input {
+            width: 100%;
+            max-width: 75px;
+            padding: 7px 4px;
+            border-radius: 20px;
+            border: 1px solid #cbdef0;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.78rem;
+            background: #fafffe;
+            transition: all 0.2s;
+        }
+        .marks-input:focus {
+            border-color: #1f8fc7;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(31, 143, 199, 0.12);
+            background: white;
+        }
+        .marks-input.invalid { 
+            border-color: #dc3545; 
+            background: #fff0f0; 
+        }
+        .marks-input::placeholder {
+            color: #c0d0e0;
+            font-size: 0.6rem;
+        }
+        @media (max-width: 768px) {
+            .marks-table .col-name { width: 32%; }
+            .marks-table .col-test1 { width: 18%; }
+            .marks-table .col-test2 { width: 18%; }
+            .marks-table .col-exam { width: 22%; }
+            .marks-input {
+                max-width: 60px;
+                padding: 5px 3px;
+                font-size: 0.72rem;
+            }
+        }
+        @media (max-width: 640px) {
+            .marks-input {
+                max-width: 50px;
+                padding: 4px 2px;
+                font-size: 0.7rem;
+            }
+            .marks-table .col-roll { width: 8%; }
+            .marks-table .col-name { width: 28%; }
+            .marks-table .col-test1 { width: 20%; }
+            .marks-table .col-test2 { width: 20%; }
+            .marks-table .col-exam { width: 24%; }
+            .marks-table .student-name {
+                font-size: 0.7rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .marks-table {
+                font-size: 0.65rem;
+                min-width: 320px;
+            }
+            .marks-table th {
+                font-size: 0.6rem;
+                padding: 6px 3px;
+            }
+            .marks-table td {
+                padding: 4px 2px;
+            }
+            .marks-input {
+                max-width: 40px;
+                padding: 3px 2px;
+                font-size: 0.65rem;
+            }
+            .marks-table .col-roll { width: 8%; }
+            .marks-table .col-name { width: 24%; }
+            .marks-table .col-test1 { width: 22%; }
+            .marks-table .col-test2 { width: 22%; }
+            .marks-table .col-exam { width: 24%; }
+        }
+        .empty-msg { 
+            text-align: center; 
+            padding: 30px 10px !important; 
+            color: #6c8faa; 
+            font-size: 0.85rem; 
+        }
+        .footer-note {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 0.6rem;
+            color: #3a789b;
+            background: #eef4fa;
+            padding: 8px 16px;
+            border-radius: 60px;
+        }
+        @media (max-width: 640px) {
+            .footer-note { text-align: center; }
+        }
+        .save-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .save-footer button {
+            padding: 10px 20px;
+            font-size: 0.8rem;
+            border-radius: 60px;
+            font-weight: 700;
+        }
+        .save-footer .btn-primary {
+            background: #28a745;
+        }
+        .save-footer .btn-sync {
+            background: #17a2b8;
+        }
+        .save-footer .btn-sync:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        @media (max-width: 640px) {
+            .save-footer button { width: 100%; }
+        }
+        .offline-badge {
+            background: #ffc107;
+            color: #212529;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.6rem;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN - MOBILE OPTIMIZED -->
+<div id="loginFullscreen" class="login-fullscreen">
+    <div class="login-card">
+        <h1>🏫 School Marks Manager</h1>
+        <div class="sub">Sign in to access your school's marks dashboard</div>
+        <div class="input-group">
+            <label>📧 EMAIL ADDRESS</label>
+            <input type="email" id="loginEmail" placeholder="teacher@school.edu" autocomplete="off" inputmode="email">
+        </div>
+        <div class="input-group">
+            <label>🔒 PASSWORD</label>
+            <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
+        </div>
+        <button class="login-btn" id="loginBtn">➡️ SIGN IN →</button>
+        <div id="loginError" class="error-msg"></div>
+    </div>
+</div>
+
+<!-- Main App -->
+<div id="appContainer" class="app-container">
+    <div class="header-area">
+        <h1>📋 School Marks Manager</h1>
+        <div class="school-badge" id="schoolBadge">🏫 Loading school data...</div>
+    </div>
+
+    <div class="user-info-bar">
+        <div class="user-details" id="userInfoDisplay"></div>
+        <button id="logoutBtn" class="logout-btn">🚪 Logout</button>
+    </div>
+
+    <div class="card-control">
+        <div class="field-group">
+            <label>🏫 SELECT CLASS</label>
+            <select id="classSelect">
+                <option value="all">📌 All Classes</option>
+            </select>
+        </div>
+        <div class="field-group">
+            <label>📖 SELECT SUBJECT</label>
+            <select id="subjectSelect">
+                <option value="">-- Loading subjects... --</option>
+            </select>
+        </div>
+        <div class="action-group">
+            <button id="refreshBtn" class="btn-outline">🔄 Reload Data</button>
+        </div>
+    </div>
+
+    <div id="statusMsg" class="status-bar">
+        <span>✅ Ready — Test marks max 15, Exam max 70</span>
+        <span id="syncStatus" class="sync-indicator">📡 Online</span>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="marks-table">
+            <thead>
+                <tr>
+                    <th class="col-roll">Roll</th>
+                    <th class="col-name">Student Name</th>
+                    <th class="col-test1">Test 1</th>
+                    <th class="col-test2">Test 2</th>
+                    <th class="col-exam">Exam</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="5" class="empty-msg">🔐 Please login to continue...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="save-footer">
+        <button id="syncPendingBtn" class="btn-sync">🔄 Sync Offline Data (<span id="pendingCount">0</span>)</button>
+        <button id="saveBtnBottom" class="btn-primary">💾 Save All Marks</button>
+    </div>
+
+    <div class="footer-note">
+        ⭐ Data source: Your school's dedicated data tab<br>
+        📏 <strong>Validation:</strong> Test marks ≤ 15 | Exam marks ≤ 70
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIGURATION ====================
+    // ⚠️ IMPORTANT: Replace this URL with your Google Apps Script Web App URL
+    const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyY_CNZF2b6bLnLHTczKopW4y2_QbVoYxRkBKp5QNr7V8k6pSXXUvKCWdMg26P7j8r3AQ/exec';
+    
+    // ==================== OFFLINE SYNC SYSTEM ====================
+    const OFFLINE_STORAGE_KEY = 'offlineMarksData';
+    const SYNC_INTERVAL = 30000;
+
+    // ==================== SESSION MANAGEMENT ====================
+    let sessionToken = null;
+    let userTabName = null;
+    let userRole = null;
+    let userEmail = null;
+    let schoolName = null;
+    
+    let studentMaster = [];
+    let subjectsCatalog = [];
+    let marksCache = {};
+    let currentClass = "all";
+    let currentSubject = "";
+    let isOffline = false;
+
+    // ==================== API CALL FUNCTIONS ====================
+    
+    function apiCallWithCallback(action, data, callback) {
+        const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        
+        let url = API_BASE_URL + '?action=' + encodeURIComponent(action);
+        for (let key in data) {
+            if (data.hasOwnProperty(key) && data[key] !== null && data[key] !== undefined) {
+                url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(data[key]));
+            }
+        }
+        url += '&callback=' + callbackName;
+        
+        const script = document.createElement('script');
+        script.src = url;
+        
+        window[callbackName] = function(response) {
+            delete window[callbackName];
+            if (script.parentNode) script.remove();
+            callback(response);
+        };
+        
+        script.onerror = function() {
+            delete window[callbackName];
+            if (script.parentNode) script.remove();
+            callback({ error: 'Network error or invalid response' });
+        };
+        
+        const timeoutId = setTimeout(() => {
+            if (window[callbackName]) {
+                delete window[callbackName];
+                if (script.parentNode) script.remove();
+                callback({ error: 'Request timeout' });
+            }
+        }, 30000);
+        
+        const originalCallback = window[callbackName];
+        window[callbackName] = function(response) {
+            clearTimeout(timeoutId);
+            originalCallback(response);
+        };
+        
+        document.body.appendChild(script);
+    }
+
+    // ==================== OFFLINE STORAGE FUNCTIONS ====================
+    
+    function getOfflineData() {
+        try {
+            const data = localStorage.getItem(OFFLINE_STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveOfflineData(entry) {
+        let pending = getOfflineData();
+        entry.timestamp = new Date().toISOString();
+        entry.retryCount = 0;
+        pending.push(entry);
+        localStorage.setItem(OFFLINE_STORAGE_KEY, JSON.stringify(pending));
+        updatePendingCount();
+        setStatus(`📶 Data saved offline. ${pending.length} item(s) pending sync.`, "warning");
+    }
+
+    function updatePendingCount() {
+        const pending = getOfflineData();
+        const countEl = document.getElementById('pendingCount');
+        if (countEl) {
+            countEl.textContent = pending.length;
+        }
+        const syncBtn = document.getElementById('syncPendingBtn');
+        if (syncBtn) {
+            syncBtn.disabled = pending.length === 0;
+        }
+        updateSyncStatus();
+    }
+
+    function updateSyncStatus() {
+        const pending = getOfflineData();
+        const syncStatus = document.getElementById('syncStatus');
+        if (syncStatus) {
+            const isOnline = navigator.onLine;
+            if (!isOnline) {
+                syncStatus.innerHTML = '📴 Offline';
+                syncStatus.style.color = '#856404';
+            } else if (pending.length > 0) {
+                syncStatus.innerHTML = `⏳ ${pending.length} pending sync`;
+                syncStatus.style.color = '#0c5460';
+            } else {
+                syncStatus.innerHTML = '📡 Online';
+                syncStatus.style.color = '#155724';
+            }
+        }
+    }
+
+    // ==================== SYNC ENGINE ====================
+
+    async function syncOfflineData() {
+        if (!navigator.onLine) {
+            setStatus('📴 Offline. Cannot sync. Will retry when online.', 'warning');
+            return;
+        }
+
+        if (!sessionToken || !userTabName) {
+            setStatus('⚠️ Please login first to sync data.', 'warning');
+            return;
+        }
+
+        const pending = getOfflineData();
+        if (pending.length === 0) {
+            setStatus('✅ No pending data to sync.', 'success');
+            updatePendingCount();
+            return;
+        }
+
+        const syncBtn = document.getElementById('syncPendingBtn');
+        syncBtn.disabled = true;
+        syncBtn.innerHTML = '⏳ Syncing...';
+
+        setStatus(`🔄 Syncing ${pending.length} item(s)...`, 'info');
+
+        let successCount = 0;
+        let failedIndices = [];
+
+        for (let i = 0; i < pending.length; i++) {
+            const entry = pending[i];
+            try {
+                const result = await performSave(entry.data);
+                if (result && result.success) {
+                    successCount++;
+                    failedIndices.push(i);
+                } else {
+                    entry.retryCount = (entry.retryCount || 0) + 1;
+                    if (entry.retryCount >= 5) {
+                        failedIndices.push(i);
+                    }
+                    pending[i] = entry;
+                }
+            } catch (error) {
+                console.error('Sync error for entry:', entry, error);
+                entry.retryCount = (entry.retryCount || 0) + 1;
+                if (entry.retryCount >= 5) {
+                    failedIndices.push(i);
+                }
+                pending[i] = entry;
+            }
+        }
+
+        const newPending = pending.filter((_, index) => !failedIndices.includes(index));
+        localStorage.setItem(OFFLINE_STORAGE_KEY, JSON.stringify(newPending));
+
+        updatePendingCount();
+
+        if (successCount === pending.length) {
+            setStatus(`✅ All ${successCount} item(s) synced successfully!`, 'success');
+        } else if (successCount > 0) {
+            setStatus(`✅ Synced ${successCount}/${pending.length} items. ${newPending.length} still pending.`, 'warning');
+        } else {
+            setStatus(`⚠️ Sync failed. ${newPending.length} item(s) pending retry.`, 'error');
+        }
+
+        syncBtn.innerHTML = '🔄 Sync Offline Data (<span id="pendingCount">' + newPending.length + '</span>)';
+        syncBtn.disabled = newPending.length === 0;
+
+        if (currentSubject) {
+            renderMarksTable();
+        }
+    }
+
+    // ==================== PERFORM SAVE ====================
+
+    function performSave(updateData) {
+        return new Promise((resolve, reject) => {
+            if (!navigator.onLine) {
+                reject(new Error('Offline'));
+                return;
+            }
+
+            apiCallWithCallback('saveMarksData', {
+                token: updateData.token,
+                tabName: updateData.tabName,
+                subjectId: updateData.subjectId,
+                className: updateData.className,
+                updates: updateData.updates
+            }, function(response) {
+                if (response && response.success) {
+                    resolve(response);
+                } else {
+                    reject(new Error(response?.error || 'Save failed'));
+                }
+            });
+        });
+    }
+
+    // ==================== SAVE WITH OFFLINE SUPPORT ====================
+
+    function saveMarksToSheet() {
+        const selectedClass = document.getElementById("classSelect").value;
+        const selectedSubject = document.getElementById("subjectSelect").value;
+        
+        if (!selectedSubject) { 
+            setStatus("⚠️ Please select a subject.", "warning"); 
+            return; 
+        }
+        if (selectedClass === "all") { 
+            setStatus("⚠️ Select a specific class to save.", "warning"); 
+            return; 
+        }
+        if (!validateAllMarks()) return;
+        
+        const rows = document.querySelectorAll("#tableBody tr");
+        const updates = [];
+        for (let row of rows) {
+            const roll = row.getAttribute("data-roll");
+            const classNameAttr = row.getAttribute("data-class");
+            if (!roll || classNameAttr !== selectedClass) continue;
+            const t1 = Math.min(15, Math.max(0, parseFloat(row.querySelector(".t1-input")?.value) || 0));
+            const t2 = Math.min(15, Math.max(0, parseFloat(row.querySelector(".t2-input")?.value) || 0));
+            const exam = Math.min(70, Math.max(0, parseFloat(row.querySelector(".exam-input")?.value) || 0));
+            updates.push({ roll: roll, className: selectedClass, test1: t1, test2: t2, exam: exam });
+        }
+        
+        if (updates.length === 0) { 
+            setStatus("No data to save.", "warning"); 
+            return; 
+        }
+        
+        const saveBtn = document.getElementById("saveBtnBottom");
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = "Saving... <span class='spinner'></span>";
+        
+        const saveData = {
+            token: sessionToken,
+            tabName: userTabName,
+            subjectId: selectedSubject,
+            className: selectedClass,
+            updates: updates
+        };
+
+        if (!navigator.onLine) {
+            saveOfflineData(saveData);
+            if (!marksCache[selectedSubject]) marksCache[selectedSubject] = {};
+            if (!marksCache[selectedSubject][selectedClass]) marksCache[selectedSubject][selectedClass] = {};
+            updates.forEach(upd => {
+                marksCache[selectedSubject][selectedClass][upd.roll] = {
+                    test1: upd.test1,
+                    test2: upd.test2,
+                    exam: upd.exam
+                };
+            });
+            renderMarksTable();
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = "💾 Save All Marks";
+            setStatus(`📶 Saved ${updates.length} record(s) offline. Will sync when online.`, "warning");
+            return;
+        }
+
+        apiCallWithCallback('saveMarksData', {
+            token: sessionToken,
+            tabName: userTabName,
+            subjectId: selectedSubject,
+            className: selectedClass,
+            updates: updates
+        }, function(response) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = "💾 Save All Marks";
+            
+            if (response && response.success) {
+                if (!marksCache[selectedSubject]) marksCache[selectedSubject] = {};
+                if (!marksCache[selectedSubject][selectedClass]) marksCache[selectedSubject][selectedClass] = {};
+                updates.forEach(upd => {
+                    marksCache[selectedSubject][selectedClass][upd.roll] = {
+                        test1: upd.test1,
+                        test2: upd.test2,
+                        exam: upd.exam
+                    };
+                });
+                setStatus(`✅ Saved ${updates.length} record(s) to "${userTabName}" tab!`, "success");
+                renderMarksTable();
+            } else {
+                saveOfflineData(saveData);
+                setStatus(`⚠️ Save failed: ${response?.error || 'Unknown error'}. Data saved offline.`, "error");
+            }
+        });
+    }
+
+    // ==================== UI FUNCTIONS ====================
+
+    function showLoginFullscreen() {
+        document.getElementById("loginFullscreen").style.display = "flex";
+        document.getElementById("appContainer").style.display = "none";
+    }
+    
+    function showApp() {
+        document.getElementById("loginFullscreen").style.display = "none";
+        document.getElementById("appContainer").style.display = "block";
+        updatePendingCount();
+        updateSyncStatus();
+    }
+    
+    function setStatus(message, type = "info") {
+        const statusDiv = document.getElementById("statusMsg");
+        if (statusDiv) {
+            const syncSpan = statusDiv.querySelector('#syncStatus');
+            const textSpan = statusDiv.querySelector('span:first-child') || document.createElement('span');
+            if (!textSpan.id) {
+                textSpan.textContent = message;
+            } else {
+                const newSpan = document.createElement('span');
+                newSpan.textContent = message;
+                statusDiv.insertBefore(newSpan, syncSpan);
+                const oldSpan = statusDiv.querySelector('span:not(#syncStatus)');
+                if (oldSpan && oldSpan !== newSpan) {
+                    oldSpan.remove();
+                }
+            }
+            statusDiv.className = "status-bar " + type;
+            if (type === "success") {
+                setTimeout(() => {
+                    const pending = getOfflineData();
+                    if (pending.length === 0 && navigator.onLine) {
+                        const textEl = statusDiv.querySelector('span:not(#syncStatus)');
+                        if (textEl) {
+                            textEl.textContent = "✅ Ready — Test marks max 15, Exam max 70";
+                        }
+                        statusDiv.className = "status-bar";
+                    }
+                }, 4000);
+            }
+        }
+    }
+    
+    function validateMark(value, fieldName, maxValue) {
+        const num = parseFloat(value);
+        if (isNaN(num)) return { valid: false, message: `${fieldName} must be a number` };
+        if (num < 0) return { valid: false, message: `${fieldName} cannot be negative` };
+        if (num > maxValue) return { valid: false, message: `${fieldName} cannot exceed ${maxValue}` };
+        return { valid: true, value: num };
+    }
+    
+    function validateAllMarks() {
+        const rows = document.querySelectorAll("#tableBody tr");
+        const errors = [];
+        for (let row of rows) {
+            const roll = row.getAttribute("data-roll");
+            const nameCell = row.querySelector("td:nth-child(2)");
+            const name = nameCell ? nameCell.innerText : roll;
+            const t1Input = row.querySelector(".t1-input");
+            const t2Input = row.querySelector(".t2-input");
+            const examInput = row.querySelector(".exam-input");
+            if (t1Input && t2Input && examInput) {
+                const t1Valid = validateMark(t1Input.value, `Test 1 for ${name}`, 15);
+                const t2Valid = validateMark(t2Input.value, `Test 2 for ${name}`, 15);
+                const examValid = validateMark(examInput.value, `Exam for ${name}`, 70);
+                if (!t1Valid.valid) errors.push(t1Valid.message);
+                if (!t2Valid.valid) errors.push(t2Valid.message);
+                if (!examValid.valid) errors.push(examValid.message);
+                t1Input.classList.toggle("invalid", !t1Valid.valid);
+                t2Input.classList.toggle("invalid", !t2Valid.valid);
+                examInput.classList.toggle("invalid", !examValid.valid);
+            }
+        }
+        if (errors.length > 0) {
+            setStatus("❌ " + errors[0] + (errors.length > 1 ? ` (+${errors.length-1} more)` : ""), "error");
+            return false;
+        }
+        return true;
+    }
+    
+    // ==================== LOGIN ====================
+
+    function handleLogin() {
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value.trim();
+        const errorDiv = document.getElementById("loginError");
+        
+        if (!email || !password) {
+            errorDiv.textContent = "Please enter both email and password.";
+            errorDiv.style.display = "block";
+            return;
+        }
+        
+        const loginBtn = document.getElementById("loginBtn");
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = "Authenticating... <span class='spinner'></span>";
+        errorDiv.style.display = "none";
+        
+        apiCallWithCallback('authenticateUser', {
+            email: email,
+            password: password
+        }, function(response) {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = "➡️ SIGN IN →";
+            
+            if (response && response.success) {
+                sessionToken = response.token;
+                userTabName = response.tabName;
+                userRole = response.role;
+                userEmail = response.email;
+                schoolName = userTabName ? userTabName.toUpperCase() : "SCHOOL";
+                
+                document.getElementById("userInfoDisplay").innerHTML = `👤 ${userEmail} | 🏫 ${schoolName} | 📑 Tab: ${userTabName}`;
+                document.getElementById("schoolBadge").innerHTML = `🏫 ${schoolName} - Data Tab: "${userTabName}"`;
+                
+                showApp();
+                loadInitialData();
+                if (navigator.onLine) {
+                    setTimeout(syncOfflineData, 2000);
+                }
+            } else {
+                errorDiv.textContent = response?.error || "Login failed. Please verify credentials.";
+                errorDiv.style.display = "block";
+            }
+        });
+    }
+    
+    function handleLogout() {
+        const pending = getOfflineData();
+        if (pending.length > 0) {
+            if (!confirm(`You have ${pending.length} unsynced offline records. Logging out will keep them for next login. Continue?`)) {
+                return;
+            }
+        }
+        
+        if (sessionToken) {
+            apiCallWithCallback('logout', { token: sessionToken }, function() {});
+        }
+        showLoginFullscreen();
+        document.getElementById("loginEmail").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+        sessionToken = null;
+        userTabName = null;
+    }
+    
+    // ==================== DATA LOADING ====================
+
+    function naturalSortClassNames(classArray) {
+        if (!classArray || classArray.length === 0) return [];
+        return classArray.sort((a, b) => {
+            const splitA = a.match(/^([A-Za-z\s-]+?)(\d*)$/);
+            const splitB = b.match(/^([A-Za-z\s-]+?)(\d*)$/);
+            const textA = splitA ? splitA[1].trim() : a;
+            const textB = splitB ? splitB[1].trim() : b;
+            const numA = splitA && splitA[2] ? parseInt(splitA[2], 10) : -1;
+            const numB = splitB && splitB[2] ? parseInt(splitB[2], 10) : -1;
+            if (textA === textB) return numA - numB;
+            return textA.localeCompare(textB);
+        });
+    }
+    
+    function getSortedClasses() {
+        const unique = [...new Set(studentMaster.map(s => s.className))];
+        return naturalSortClassNames(unique);
+    }
+    
+    function populateClassDropdown() {
+        const classSelect = document.getElementById("classSelect");
+        const sorted = getSortedClasses();
+        classSelect.innerHTML = '<option value="all">📌 All Classes (View All)</option>';
+        sorted.forEach(cls => {
+            const opt = document.createElement("option");
+            opt.value = cls;
+            opt.textContent = cls;
+            classSelect.appendChild(opt);
+        });
+        classSelect.value = currentClass;
+    }
+    
+    function populateSubjectDropdown() {
+        const subSelect = document.getElementById("subjectSelect");
+        if (!subjectsCatalog || subjectsCatalog.length === 0) {
+            subSelect.innerHTML = '<option value="">-- No subjects found --</option>';
+            return;
+        }
+        subSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+        subjectsCatalog.forEach(sub => {
+            const opt = document.createElement("option");
+            opt.value = sub.id;
+            opt.textContent = sub.display;
+            subSelect.appendChild(opt);
+        });
+        if (subjectsCatalog.length > 0) {
+            subSelect.value = subjectsCatalog[0].id;
+            currentSubject = subjectsCatalog[0].id;
+            renderMarksTable();
+        }
+    }
+    
+    function renderMarksTable() {
+        const tbody = document.getElementById("tableBody");
+        const selectedClass = document.getElementById("classSelect").value;
+        const selectedSubject = document.getElementById("subjectSelect").value;
+        currentClass = selectedClass;
+        currentSubject = selectedSubject;
+        
+        if (!selectedSubject || subjectsCatalog.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">📌 Please select a subject</td></tr>`;
+            return;
+        }
+        
+        let filteredStudents = (selectedClass === "all") ? [...studentMaster] : studentMaster.filter(s => s.className === selectedClass);
+        if (filteredStudents.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">🏫 No students found for this class</td></tr>`;
+            return;
+        }
+        
+        tbody.innerHTML = "";
+        for (let student of filteredStudents) {
+            const studentClass = student.className;
+            let marks = { test1: 0, test2: 0, exam: 0 };
+            if (marksCache[selectedSubject] && marksCache[selectedSubject][studentClass] && marksCache[selectedSubject][studentClass][student.roll]) {
+                marks = marksCache[selectedSubject][studentClass][student.roll];
+            }
+            const row = document.createElement("tr");
+            row.setAttribute("data-roll", student.roll);
+            row.setAttribute("data-class", studentClass);
+            row.innerHTML = `
+                <td class="col-roll">${escapeHtml(student.roll)}</td>
+                <td class="col-name student-name">${escapeHtml(student.name)}</td>
+                <td class="col-test1"><input type="number" step="0.5" value="${marks.test1}" class="marks-input t1-input" placeholder="0-15"></td>
+                <td class="col-test2"><input type="number" step="0.5" value="${marks.test2}" class="marks-input t2-input" placeholder="0-15"></td>
+                <td class="col-exam"><input type="number" step="0.5" value="${marks.exam}" class="marks-input exam-input" placeholder="0-70"></td>
+            `;
+            tbody.appendChild(row);
+        }
+    }
+    
+    function escapeHtml(str) { 
+        if(!str) return ''; 
+        return str.replace(/[&<>]/g, function(m){
+            if(m==='&') return '&'; 
+            if(m==='<') return '<'; 
+            if(m==='>') return '>'; 
+            return m;
+        }); 
+    }
+    
+    function loadInitialData() {
+        if (!userTabName) {
+            setStatus("No school tab assigned. Please contact administrator.", "error");
+            return;
+        }
+        
+        setStatus(`🔄 Loading data from "${userTabName}" tab...`, "info");
+        
+        apiCallWithCallback('getStudentData', {
+            token: sessionToken,
+            tabName: userTabName
+        }, function(students) {
+            if (students && students.error) { 
+                setStatus(students.error, "error"); 
+                return; 
+            }
+            studentMaster = students || [];
+            
+            apiCallWithCallback('getSubjects', {
+                token: sessionToken,
+                tabName: userTabName
+            }, function(subjects) {
+                if (subjects && subjects.error) { 
+                    setStatus(subjects.error, "error"); 
+                    return; 
+                }
+                subjectsCatalog = subjects || [];
+                populateSubjectDropdown();
+                
+                apiCallWithCallback('getMarksData', {
+                    token: sessionToken,
+                    tabName: userTabName
+                }, function(marks) {
+                    if (marks && marks.error) { 
+                        setStatus(marks.error, "error"); 
+                        return; 
+                    }
+                    marksCache = marks || {};
+                    populateClassDropdown();
+                    renderMarksTable();
+                    setStatus(`✅ Loaded ${studentMaster.length} students, ${subjectsCatalog.length} subjects from "${userTabName}" tab`, "success");
+                    updatePendingCount();
+                });
+            });
+        });
+    }
+    
+    // ==================== NETWORK EVENT HANDLERS ====================
+
+    function handleNetworkChange() {
+        isOffline = !navigator.onLine;
+        updateSyncStatus();
+        
+        if (navigator.onLine) {
+            setStatus('📡 Network restored. Syncing pending data...', 'info');
+            setTimeout(syncOfflineData, 1000);
+        } else {
+            setStatus('📴 Network lost. Data will be saved offline.', 'warning');
+        }
+    }
+
+    // ==================== BIND EVENTS ====================
+
+    function bindEvents() {
+        document.getElementById("classSelect")?.addEventListener("change", () => renderMarksTable());
+        document.getElementById("subjectSelect")?.addEventListener("change", () => renderMarksTable());
+        document.getElementById("saveBtnBottom")?.addEventListener("click", saveMarksToSheet);
+        document.getElementById("syncPendingBtn")?.addEventListener("click", syncOfflineData);
+        document.getElementById("refreshBtn")?.addEventListener("click", () => loadInitialData());
+        document.getElementById("loginBtn")?.addEventListener("click", handleLogin);
+        document.getElementById("logoutBtn")?.addEventListener("click", handleLogout);
+        document.getElementById("loginPassword")?.addEventListener("keypress", (e) => { if (e.key === "Enter") handleLogin(); });
+        
+        window.addEventListener('online', handleNetworkChange);
+        window.addEventListener('offline', handleNetworkChange);
+        
+        setInterval(() => {
+            if (navigator.onLine && sessionToken) {
+                const pending = getOfflineData();
+                if (pending.length > 0) {
+                    syncOfflineData();
+                }
+            }
+            updateSyncStatus();
+        }, SYNC_INTERVAL);
+    }
+    
+    // ==================== INITIALIZATION ====================
+
+    window.addEventListener("load", () => {
+        bindEvents();
+        showLoginFullscreen();
+        updatePendingCount();
+        updateSyncStatus();
+        
+        if (API_BASE_URL.includes('YOUR_DEPLOYMENT_ID')) {
+            console.warn('⚠️ Please replace YOUR_DEPLOYMENT_ID with your actual deployment ID');
+            document.getElementById("loginError").textContent = '⚠️ Please configure the API URL in the script.';
+            document.getElementById("loginError").style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>
