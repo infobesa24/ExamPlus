@@ -137,7 +137,6 @@
   .chip.active{background:var(--amber); color:var(--ink); border-color:var(--amber); font-weight:600;}
 
   .search{
-    margin-left:auto;
     display:flex;
     align-items:center;
     gap:8px;
@@ -145,6 +144,24 @@
     border-radius:999px;
     padding:6px 13px;
     min-width:170px;
+    width:100%;
+  }
+  .group-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:10px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:26px 0 10px;
+  }
+  .group-title:first-child{margin-top:4px;}
+  .group-title::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
   }
   .search input{
     background:none; border:none; outline:none;
@@ -278,20 +295,16 @@
   <div class="hero">
     <div class="eyebrow reveal" style="animation-delay:.05s">Ahmad's build ledger</div>
     <h1 class="reveal" style="animation-delay:.15s">EXAMPLUS<br><em>console</em></h1>
-    <p class="tagline reveal" style="animation-delay:.25s">Every app on this page was written on a phone, one heredoc at a time, and compiled by GitHub Actions. This is where they all live.</p>
+    <p class="tagline reveal" style="animation-delay:.25s">The home base for every screen in the system — schools, students, results, receipts, all one tap away.</p>
   </div>
 
-  <div class="controls">
-    <button class="chip active" data-filter="all">All</button>
-    <button class="chip" data-filter="stable">Stable</button>
-    <button class="chip" data-filter="beta">Beta</button>
-    <button class="chip" data-filter="tool">Tools</button>
+  <div class="controls" id="controls">
     <div class="search">
-      <input id="search" type="text" placeholder="filename or tag" autocomplete="off">
+      <input id="search" type="text" placeholder="filename or module" autocomplete="off">
     </div>
   </div>
 
-  <div class="ledger">
+  <div class="ledger" id="ledger">
     <div class="row-head">
       <span>No.</span><span>Entry</span><span>Tag</span><span>Status</span>
     </div>
@@ -309,73 +322,97 @@
 <script>
 /* ============================================================
    LEDGER CONFIG — edit this list to match the files in your repo.
-   file:   relative path to the .html file in this same repository
-   title:  display name
-   desc:   one-line description
-   status: "stable" | "beta" | "broken"
-   tag:    "app" | "tool" | "game"  (used by the Tools filter)
+   file:     relative path to the .html file in this same repository
+   title:    display name
+   desc:     one-line description
+   category: groups entries under a header in the "All" view,
+             and becomes a filter chip automatically
+   status:   "stable" | "beta" | "broken"
    ============================================================ */
 const APPS = [
-  {
-    file: "report.html",
-    title: "Report Cards",
-    desc: "Grades, class ranking, mobile-friendly PDF export.",
-    status: "stable",
-    tag: "app"
-  }
+  { file: "school.html",           title: "School Profile",   desc: "Core school info and profile settings.",              category: "Setup",    status: "stable" },
+  { file: "create-school.html",    title: "Create School",    desc: "Register a new school in the system.",                category: "Setup",    status: "stable" },
+  { file: "view-schools.html",     title: "View Schools",     desc: "Browse and manage registered schools.",               category: "Setup",    status: "stable" },
 
-  /* Add more entries below as you add files to the repo, e.g:
-  ,{
-    file: "examplus.html",
-    title: "EXAMPLUS",
-    desc: "Role-based school management — Admin, Bursar, Teacher.",
-    status: "stable",
-    tag: "app"
-  }
-  */
+  { file: "students.html",         title: "Students",         desc: "Student records and profiles.",                       category: "Students", status: "stable" },
+  { file: "students-bulk.html",    title: "Bulk Students",    desc: "Bulk import and edit of student records.",            category: "Students", status: "stable" },
+
+  { file: "subjects.html",         title: "Subjects",         desc: "Manage subjects and class assignments.",              category: "Academics", status: "stable" },
+
+  { file: "upload-result.html",    title: "Upload Results",   desc: "Enter and upload student results.",                   category: "Results",  status: "stable" },
+  { file: "view-results.html",     title: "View Results",     desc: "Browse recorded student results.",                    category: "Results",  status: "stable" },
+  { file: "assessment.htm",        title: "Assessment",       desc: "Assessment records and scoring.",                     category: "Results",  status: "stable" },
+  { file: "report.html",           title: "Report Cards",     desc: "Auto-graded report cards with class ranking.",        category: "Results",  status: "stable" },
+
+  { file: "generate-receipt.html", title: "Generate Receipt", desc: "Create payment receipts for fees.",                   category: "Finance",  status: "stable" },
+  { file: "receipt-history.html",  title: "Receipt History",  desc: "Look up past issued receipts.",                       category: "Finance",  status: "stable" },
+
+  { file: "settings.html",         title: "Settings",         desc: "System-wide configuration.",                          category: "System",   status: "stable" },
+
+  /* TODO: confirm the real filename for signup/activation — placeholder below */
+  { file: "signup.html",           title: "Signup / Activate", desc: "Account signup and activation. Confirm filename.",   category: "Account",  status: "beta" }
 ];
 /* ============================================================ */
 
 const entriesEl = document.getElementById('entries');
 const emptyEl = document.getElementById('empty');
 const countEl = document.getElementById('count');
+const controlsEl = document.getElementById('controls');
 let activeFilter = 'all';
 let query = '';
 
-function render(){
-  const filtered = APPS.filter(a => {
-    const matchesFilter =
-      activeFilter === 'all' ||
-      (activeFilter === 'tool' && (a.tag === 'tool' || a.tag === 'game')) ||
-      a.status === activeFilter;
-    const q = query.trim().toLowerCase();
-    const matchesQuery = !q || a.title.toLowerCase().includes(q) || a.file.toLowerCase().includes(q) || a.tag.toLowerCase().includes(q);
-    return matchesFilter && matchesQuery;
-  });
+/* build filter chips dynamically from categories present */
+const categories = ['all', ...new Set(APPS.map(a => a.category))];
+const chipsHTML = categories.map(c =>
+  `<button class="chip${c==='all' ? ' active' : ''}" data-filter="${c}">${c === 'all' ? 'All' : c}</button>`
+).join('');
+controlsEl.insertAdjacentHTML('afterbegin', chipsHTML);
 
-  entriesEl.innerHTML = filtered.map((a, i) => `
+function rowHTML(a, num){
+  return `
     <a class="entry" href="${a.file}">
-      <span class="num">${String(i+1).padStart(2,'0')}</span>
+      <span class="num">${String(num).padStart(2,'0')}</span>
       <span class="meta">
         <span class="file">${a.file}</span>
         <span class="desc">${a.desc}</span>
       </span>
-      <span class="tag">${a.tag}</span>
+      <span class="tag">${a.category}</span>
       <span class="status"><span class="dot ${a.status}"></span>${a.status}</span>
-    </a>
-  `).join('');
-
-  emptyEl.style.display = filtered.length ? 'none' : 'block';
-  countEl.textContent = `${filtered.length} of ${APPS.length} entries`;
+    </a>`;
 }
 
-document.querySelectorAll('.chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    activeFilter = chip.dataset.filter;
-    render();
-  });
+function render(){
+  const q = query.trim().toLowerCase();
+  const matchesQuery = a => !q || a.title.toLowerCase().includes(q) || a.file.toLowerCase().includes(q) || a.category.toLowerCase().includes(q);
+
+  let html = '';
+  let shown = 0;
+
+  if (activeFilter === 'all'){
+    let n = 0;
+    for (const cat of new Set(APPS.map(a => a.category))){
+      const group = APPS.filter(a => a.category === cat && matchesQuery(a));
+      if (!group.length) continue;
+      html += `<div class="group-title">${cat}</div>`;
+      group.forEach(a => { n++; html += rowHTML(a, n); shown++; });
+    }
+  } else {
+    const filtered = APPS.filter(a => a.category === activeFilter && matchesQuery(a));
+    filtered.forEach((a, i) => { html += rowHTML(a, i + 1); shown++; });
+  }
+
+  entriesEl.innerHTML = html;
+  emptyEl.style.display = shown ? 'none' : 'block';
+  countEl.textContent = `${shown} of ${APPS.length} entries`;
+}
+
+controlsEl.addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activeFilter = chip.dataset.filter;
+  render();
 });
 
 document.getElementById('search').addEventListener('input', e => {
