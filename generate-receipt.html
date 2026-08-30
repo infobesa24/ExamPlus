@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bursar Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #1a5dab;
+        }
+        .header h1 span {
+            font-size: 14px;
+            color: #666;
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .user-badge {
+            background: #e8f0fe;
+            padding: 8px 16px;
+            border-radius: 30px;
+            color: #1a5dab;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .login-box {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 10px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        .login-box input:focus {
+            border-color: #1a5dab;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26,93,171,0.1);
+        }
+        .login-box button {
+            width: 100%;
+            padding: 14px;
+            background: #1a5dab;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        .login-box button:hover:not(:disabled) {
+            background: #124a8a;
+            transform: translateY(-2px);
+        }
+        .login-box button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-msg {
+            color: #ef4444;
+            background: #fef2f2;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+        .error-msg.show {
+            display: block;
+        }
+        .hidden { display: none !important; }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .school-info h2 {
+            font-size: 20px;
+            color: #1e293b;
+        }
+        .school-info p {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .term-badge {
+            background: #e8f0fe;
+            padding: 6px 16px;
+            border-radius: 30px;
+            color: #1a5dab;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .section-label {
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        select, input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            background: white;
+            margin: 5px 0;
+        }
+        select:focus, input:focus {
+            border-color: #1a5dab;
+            outline: none;
+        }
+        
+        .student-list {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .student-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .student-item:hover {
+            background: #f8fafc;
+        }
+        .student-item.selected {
+            background: #e8f0fe;
+            border-left: 3px solid #1a5dab;
+        }
+        .student-item .name {
+            font-weight: 500;
+        }
+        .student-item .class {
+            background: #e2e8f0;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .empty-state {
+            padding: 30px;
+            text-align: center;
+            color: #94a3b8;
+        }
+        .empty-state i {
+            font-size: 30px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .fee-panel {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 2px solid #e2e8f0;
+        }
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .fee-row:last-child {
+            border-bottom: none;
+        }
+        .fee-row .label { color: #64748b; }
+        .fee-row .value { font-weight: 600; }
+        
+        .amount-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            padding: 10px 14px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+        .amount-group label {
+            font-weight: 600;
+            font-size: 13px;
+            min-width: 120px;
+        }
+        .amount-group .currency {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .amount-group input {
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        .amount-group input:focus {
+            border-color: #1a5dab;
+            outline: none;
+        }
+        
+        .total-display {
+            background: linear-gradient(135deg, #1a5dab, #124a8a);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .total-display .amount {
+            font-size: 24px;
+            font-weight: 800;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .actions button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 120px;
+            transition: all 0.3s;
+        }
+        .btn-generate {
+            background: #0f7b3a;
+            color: white;
+        }
+        .btn-generate:hover:not(:disabled) {
+            background: #0a622e;
+            transform: translateY(-2px);
+        }
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-logout {
+            background: transparent;
+            border: 2px solid #e2e8f0 !important;
+            color: #475569;
+        }
+        .btn-logout:hover {
+            background: #f8fafc;
+        }
+        
+        #receiptOutput {
+            margin-top: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            min-height: 80px;
+            overflow: hidden;
+            background: white;
+        }
+        #receiptOutput iframe {
+            width: 100%;
+            border: none;
+            min-height: 400px;
+        }
+        .receipt-placeholder {
+            padding: 30px;
+            text-align: center;
+            color: #94a3b8;
+        }
+        .receipt-placeholder i {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 14px 24px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s;
+            z-index: 1000;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast.success { background: #0f7b3a; }
+        .toast.error { background: #ef4444; }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .header h1 { font-size: 18px; }
+            .user-badge { font-size: 12px; padding: 6px 12px; }
+            .amount-group { flex-direction: column; align-items: stretch; }
+            .amount-group label { min-width: auto; }
+            .actions { flex-direction: column; }
+            .actions button { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="container">
+    <div class="header">
+        <h1>🏫 Bursar <span>Fees</span></h1>
+        <div class="user-badge" id="userBadge">👤 Guest</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginSection">
+        <div class="login-box">
+            <h2>🔐 Login</h2>
+            <div id="loginError" class="error-msg"></div>
+            <input type="email" id="loginEmail" placeholder="Email" value="bursar@school.com">
+            <input type="password" id="loginPassword" placeholder="Password" value="bursar123">
+            <button id="loginBtn">Sign In</button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboardSection" class="hidden">
+        <div class="dashboard-header">
+            <div class="school-info">
+                <h2 id="schoolName">School Name</h2>
+                <p id="schoolDetails">Address • Contact</p>
+            </div>
+            <div class="term-badge" id="termDisplay">📅 2025/2026</div>
+        </div>
+
+        <!-- Class -->
+        <div class="section-label">📚 Select Class</div>
+        <select id="classSelect">
+            <option value="">Loading classes...</option>
+        </select>
+
+        <!-- Students -->
+        <div class="section-label" style="margin-top:15px;">👨‍🎓 Select Student <span id="studentCount" style="background:#e2e8f0;padding:2px 10px;border-radius:20px;font-size:12px;margin-left:8px;">0</span></div>
+        <div class="student-list" id="studentList">
+            <div class="empty-state"><i class="fas fa-users"></i>Select a class to see students</div>
+        </div>
+
+        <!-- Fee Panel -->
+        <div class="fee-panel">
+            <div style="font-weight:600;color:#64748b;margin-bottom:10px;font-size:13px;">📋 Student Details</div>
+            <div class="fee-row"><span class="label">Student</span><span class="value" id="selectedName">—</span></div>
+            <div class="fee-row"><span class="label">Class</span><span class="value" id="selectedClass">—</span></div>
+            <div class="fee-row"><span class="label">Admission No</span><span class="value" id="selectedSerial">—</span></div>
+            <div class="fee-row"><span class="label">Term</span><span class="value" id="selectedTerm">—</span></div>
+
+            <div class="amount-group">
+                <label><i class="fas fa-money-bill"></i> School Fees</label>
+                <span class="currency">₦</span>
+                <input type="number" id="schoolFees" value="6000" step="1000">
+            </div>
+            <div class="amount-group">
+                <label><i class="fas fa-clipboard"></i> Registration</label>
+                <span class="currency">₦</span>
+                <input type="number" id="registrationFee" value="0" step="500">
+            </div>
+            <div class="amount-group">
+                <label><i class="fas fa-book"></i> Books/Dev</label>
+                <span class="currency">₦</span>
+                <input type="number" id="developmentLevy" value="0" step="500">
+            </div>
+
+            <div class="total-display">
+                <span>💰 TOTAL</span>
+                <span class="amount" id="totalAmount">₦6,000</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn-generate" id="generateBtn" disabled>
+                <i class="fas fa-file-invoice"></i> Generate Receipt
+            </button>
+            <button class="btn-logout" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+
+        <!-- Receipt -->
+        <div id="receiptOutput">
+            <div class="receipt-placeholder">
+                <i class="fas fa-receipt"></i>
+                Select student, enter amounts, then generate receipt
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURATION - CHANGE THIS TO YOUR URL
+// ============================================================
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz38_0B4nV3paymyk7-Oknks14QA04h7yxJMg6PDt6CCHO0Lfmpwp2sYDMIFCRZ0S0CKQ/exec';
+
+// ============================================================
+// STATE
+// ============================================================
+var currentUser = null;
+var students = [];
+var selectedStudent = null;
+
+// ============================================================
+// DOM REFS
+// ============================================================
+var $ = function(id) { return document.getElementById(id); };
+
+var loginSection = $('loginSection');
+var dashboardSection = $('dashboardSection');
+var loginEmail = $('loginEmail');
+var loginPassword = $('loginPassword');
+var loginBtn = $('loginBtn');
+var loginError = $('loginError');
+var logoutBtn = $('logoutBtn');
+var userBadge = $('userBadge');
+var schoolName = $('schoolName');
+var schoolDetails = $('schoolDetails');
+var termDisplay = $('termDisplay');
+var classSelect = $('classSelect');
+var studentList = $('studentList');
+var studentCount = $('studentCount');
+var selectedName = $('selectedName');
+var selectedClass = $('selectedClass');
+var selectedSerial = $('selectedSerial');
+var selectedTerm = $('selectedTerm');
+var generateBtn = $('generateBtn');
+var receiptOutput = $('receiptOutput');
+var schoolFees = $('schoolFees');
+var registrationFee = $('registrationFee');
+var developmentLevy = $('developmentLevy');
+var totalAmount = $('totalAmount');
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type) {
+    var toast = document.querySelector('.toast');
+    toast.textContent = msg;
+    toast.className = 'toast ' + type + ' show';
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(function() {
+        toast.classList.remove('show');
+    }, 4000);
+}
+
+// ============================================================
+// API CALL - GET
+// ============================================================
+function apiCall(action, data, callback) {
+    var url = SCRIPT_URL + '?action=' + encodeURIComponent(action);
+    
+    for (var key in data) {
+        if (data.hasOwnProperty(key) && data[key] !== null && data[key] !== undefined) {
+            var value = typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key];
+            url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
+        }
+    }
+    
+    console.log('API Call URL:', url);
+    
+    var controller = new AbortController();
+    var timeout = setTimeout(function() {
+        controller.abort();
+    }, 20000);
+    
+    fetch(url, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(function(response) {
+        clearTimeout(timeout);
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+        }
+        return response.json();
+    })
+    .then(function(data) {
+        console.log('Response:', data);
+        callback(data);
+    })
+    .catch(function(error) {
+        clearTimeout(timeout);
+        console.error('Fetch error:', error);
+        callback({ error: 'Network error - please check your connection' });
+    });
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function escapeHtml(text) {
+    if (!text) return '';
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function updateTotal() {
+    var fees = parseFloat(schoolFees.value) || 0;
+    var reg = parseFloat(registrationFee.value) || 0;
+    var dev = parseFloat(developmentLevy.value) || 0;
+    totalAmount.textContent = '₦' + (fees + reg + dev).toLocaleString();
+}
+
+function showLoginError(msg) {
+    loginError.textContent = msg;
+    loginError.className = 'error-msg show';
+}
+
+function hideLoginError() {
+    loginError.className = 'error-msg';
+}
+
+function renderStudents() {
+    if (!students || students.length === 0) {
+        studentList.innerHTML = '<div class="empty-state"><i class="fas fa-users-slash"></i>No students found</div>';
+        studentCount.textContent = '0';
+        return;
+    }
+    
+    studentCount.textContent = students.length;
+    var html = '';
+    students.forEach(function(s, i) {
+        var sel = (selectedStudent && selectedStudent.serial === s.serial) ? 'selected' : '';
+        html += '<div class="student-item ' + sel + '" data-index="' + i + '">';
+        html += '<span class="name">' + escapeHtml(s.name) + '</span>';
+        html += '<span class="class">' + escapeHtml(s.class) + '</span>';
+        html += '</div>';
+    });
+    studentList.innerHTML = html;
+    
+    document.querySelectorAll('.student-item[data-index]').forEach(function(el) {
+        el.addEventListener('click', function() {
+            var idx = parseInt(this.dataset.index);
+            if (!isNaN(idx) && students[idx]) {
+                selectStudent(idx);
+            }
+        });
+    });
+}
+
+function selectStudent(index) {
+    if (!students || !students[index]) return;
+    selectedStudent = students[index];
+    
+    selectedName.textContent = selectedStudent.name || '—';
+    selectedClass.textContent = selectedStudent.class || '—';
+    selectedSerial.textContent = selectedStudent.serial || '—';
+    selectedTerm.textContent = currentUser ? currentUser.term : '—';
+    
+    document.querySelectorAll('.student-item').forEach(function(el) {
+        el.classList.remove('selected');
+    });
+    var items = document.querySelectorAll('.student-item[data-index]');
+    if (items[index]) items[index].classList.add('selected');
+    
+    generateBtn.disabled = false;
+    receiptOutput.innerHTML = '<div class="receipt-placeholder"><i class="fas fa-check-circle" style="color:#10b981;"></i>Selected: <strong>' + escapeHtml(selectedStudent.name) + '</strong><br>Enter amounts and generate receipt</div>';
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+function login() {
+    var email = loginEmail.value.trim();
+    var password = loginPassword.value.trim();
+    
+    if (!email || !password) {
+        showLoginError('Please enter email and password');
+        return;
+    }
+    
+    loginBtn.innerHTML = '<span class="loading-spinner"></span> Logging in...';
+    loginBtn.disabled = true;
+    hideLoginError();
+    
+    apiCall('validateLogin', { email: email, password: password }, function(result) {
+        loginBtn.innerHTML = 'Sign In';
+        loginBtn.disabled = false;
+        
+        if (!result || !result.authenticated) {
+            showLoginError(result && result.error ? result.error : 'Invalid credentials');
+            return;
+        }
+        
+        if ((result.role || '').toLowerCase() !== 'bursar') {
+            showLoginError('Access denied. Only bursar accounts can login.');
+            return;
+        }
+        
+        currentUser = result;
+        
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        
+        userBadge.textContent = '👤 ' + currentUser.email;
+        schoolName.textContent = currentUser.schoolName || 'School';
+        schoolDetails.textContent = (currentUser.address || '') + ' • ' + (currentUser.contact || '');
+        termDisplay.textContent = '📅 ' + (currentUser.term || '2025/2026');
+        selectedTerm.textContent = currentUser.term || '—';
+        
+        loadClasses(currentUser.schoolTab);
+        showToast('Welcome ' + currentUser.email + '!', 'success');
+    });
+}
+
+// ============================================================
+// LOAD CLASSES
+// ============================================================
+function loadClasses(schoolTab) {
+    if (!schoolTab) {
+        classSelect.innerHTML = '<option value="">No school tab specified</option>';
+        return;
+    }
+    
+    classSelect.innerHTML = '<option value="">Loading classes...</option>';
+    classSelect.disabled = true;
+    
+    apiCall('getClassesFromSchoolTab', { schoolTab: schoolTab }, function(result) {
+        classSelect.disabled = false;
+        
+        if (result && result.error) {
+            classSelect.innerHTML = '<option value="">Error: ' + escapeHtml(result.error) + '</option>';
+            showToast('Error loading classes: ' + result.error, 'error');
+            return;
+        }
+        
+        var classes = Array.isArray(result) ? result : [];
+        
+        if (!classes || classes.length === 0) {
+            classSelect.innerHTML = '<option value="">No classes found</option>';
+            showToast('No classes found. Please check your sheet.', 'error');
+            return;
+        }
+        
+        var html = '<option value="">-- Select Class --</option>';
+        classes.forEach(function(c) {
+            html += '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + '</option>';
+        });
+        classSelect.innerHTML = html;
+        
+        showToast('Loaded ' + classes.length + ' classes', 'success');
+    });
+}
+
+// ============================================================
+// LOAD STUDENTS
+// ============================================================
+function loadStudents(className) {
+    if (!className) {
+        students = [];
+        selectedStudent = null;
+        generateBtn.disabled = true;
+        studentList.innerHTML = '<div class="empty-state"><i class="fas fa-layer-group"></i>Select a class above</div>';
+        studentCount.textContent = '0';
+        return;
+    }
+    
+    studentList.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i>Loading...</div>';
+    
+    apiCall('getStudentsFromSchoolTab', { 
+        schoolTab: currentUser.schoolTab, 
+        className: className 
+    }, function(result) {
+        students = Array.isArray(result) ? result : [];
+        selectedStudent = null;
+        generateBtn.disabled = true;
+        selectedName.textContent = '—';
+        selectedClass.textContent = '—';
+        selectedSerial.textContent = '—';
+        
+        renderStudents();
+        
+        if (students.length > 0) {
+            receiptOutput.innerHTML = '<div class="receipt-placeholder"><i class="fas fa-users" style="color:#1a5dab;"></i>' + students.length + ' students loaded. Select one.</div>';
+        } else {
+            receiptOutput.innerHTML = '<div class="receipt-placeholder"><i class="fas fa-users-slash"></i>No students in this class</div>';
+        }
+    });
+}
+
+// ============================================================
+// GENERATE RECEIPT - FIXED VERSION
+// ============================================================
+function generateReceipt() {
+    if (!selectedStudent) {
+        showToast('Please select a student first', 'error');
+        return;
+    }
+    
+    var fees = parseFloat(schoolFees.value) || 0;
+    var reg = parseFloat(registrationFee.value) || 0;
+    var dev = parseFloat(developmentLevy.value) || 0;
+    
+    if (fees <= 0) {
+        showToast('Please enter a valid school fees amount', 'error');
+        return;
+    }
+    
+    if (!currentUser || !currentUser.schoolTab) {
+        showToast('School information missing. Please login again.', 'error');
+        return;
+    }
+    
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<span class="loading-spinner"></span> Generating...';
+    receiptOutput.innerHTML = '<div class="receipt-placeholder"><i class="fas fa-spinner fa-spin" style="font-size:30px;color:#1a5dab;"></i><br>Generating receipt...</div>';
+    
+    var payload = {
+        student: selectedStudent,
+        school: currentUser.schoolName || 'School',
+        term: currentUser.term || '2025/2026',
+        email: currentUser.email || 'Bursar',
+        schoolFees: fees,
+        registrationFee: reg,
+        developmentLevy: dev,
+        schoolAddress: currentUser.address || '',
+        schoolContact: currentUser.contact || '',
+        schoolLogo: currentUser.logo || ''
+    };
+    
+    console.log('Generating receipt for:', selectedStudent.name);
+    console.log('Payload:', payload);
+    
+    var url = SCRIPT_URL + '?action=generateStudentFee';
+    
+    var controller = new AbortController();
+    var timeout = setTimeout(function() {
+        controller.abort();
+    }, 20000);
+    
+    var formData = new FormData();
+    formData.append('payload', JSON.stringify(payload));
+    
+    fetch(url, {
+        method: 'POST',
+        signal: controller.signal,
+        body: formData,
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(function(response) {
+        clearTimeout(timeout);
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+        }
+        return response.json();
+    })
+    .then(function(result) {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<i class="fas fa-file-invoice"></i> Generate Receipt';
+        
+        console.log('Result:', result);
+        
+        if (result && result.error) {
+            receiptOutput.innerHTML = '<div class="receipt-placeholder"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>Error: ' + escapeHtml(result.error) + '</div>';
+            showToast('Error: ' + result.error, 'error');
+            return;
+        }
+        
+        if (result && result.posHtml) {
+            var fullHtml = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body { margin: 0; padding: 10px; display: flex; justify-content: center; background: #f8fafc; font-family: 'Courier New', monospace; }
+                    @page { size: 80mm auto; margin: 5mm; }
+                    @media print { body { padding: 0; background: white; } .no-print { display: none; } }
+                </style>
+            </head>
+            <body>
+                ${result.posHtml}
+                <div class="no-print" style="text-align:center;margin-top:10px;padding:10px;">
+                    <button onclick="window.print()" style="padding:10px 25px;background:#1a5dab;color:white;border:none;border-radius:6px;font-size:14px;cursor:pointer;">🖨️ Print</button>
+                    <button onclick="window.close()" style="padding:10px 25px;background:#64748b;color:white;border:none;border-radius:6px;font-size:14px;cursor:pointer;margin-left:10px;">Close</button>
+                </div>
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.print();
+                        }, 1000);
+                    };
+                <\/script>
+            </body>
+            </html>
+            `;
+            
+            var iframe = document.createElement('iframe');
+            iframe.srcdoc = fullHtml;
+            iframe.style.width = '100%';
+            iframe.style.border = 'none';
+            iframe.style.minHeight = '400px';
+            iframe.style.height = 'auto';
+            iframe.style.background = 'white';
+            iframe.style.borderRadius = '8px';
+            
+            receiptOutput.innerHTML = '';
+            receiptOutput.appendChild(iframe);
+            showToast('Receipt generated and saved to sheet! ✅', 'success');
+        } else {
+            receiptOutput.innerHTML = '<div class="receipt-placeholder"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>Failed to generate receipt</div>';
+            showToast('Failed to generate receipt', 'error');
+        }
+    })
+    .catch(function(error) {
+        clearTimeout(timeout);
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<i class="fas fa-file-invoice"></i> Generate Receipt';
+        
+        receiptOutput.innerHTML = '<div class="receipt-placeholder"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>Error: ' + escapeHtml(error.message) + '</div>';
+        showToast('Error: ' + error.message, 'error');
+        console.error('Generate error:', error);
+    });
+}
+
+// ============================================================
+// LOGOUT
+// ============================================================
+function logout() {
+    currentUser = null;
+    students = [];
+    selectedStudent = null;
+    
+    loginSection.classList.remove('hidden');
+    dashboardSection.classList.add('hidden');
+    userBadge.textContent = '👤 Guest';
+    loginEmail.value = '';
+    loginPassword.value = '';
+    schoolFees.value = '6000';
+    registrationFee.value = '0';
+    developmentLevy.value = '0';
+    classSelect.innerHTML = '<option value="">Loading classes...</option>';
+    studentList.innerHTML = '<div class="empty-state"><i class="fas fa-layer-group"></i>Select a class above</div>';
+    studentCount.textContent = '0';
+    receiptOutput.innerHTML = '<div class="receipt-placeholder"><i class="fas fa-receipt"></i>Select student, enter amounts, then generate receipt</div>';
+    showToast('Logged out', 'success');
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+loginBtn.addEventListener('click', login);
+logoutBtn.addEventListener('click', logout);
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !loginSection.classList.contains('hidden')) {
+        login();
+    }
+});
+
+classSelect.addEventListener('change', function() {
+    loadStudents(this.value);
+});
+
+schoolFees.addEventListener('input', updateTotal);
+registrationFee.addEventListener('input', updateTotal);
+developmentLevy.addEventListener('input', updateTotal);
+
+generateBtn.addEventListener('click', generateReceipt);
+
+// ============================================================
+// INIT
+// ============================================================
+updateTotal();
+console.log('🚀 Bursar System Ready');
+console.log('📌 SCRIPT_URL:', SCRIPT_URL);
+
+if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    console.warn('⚠️ Please update SCRIPT_URL with your Apps Script URL');
+    showToast('Please update the SCRIPT_URL in the code', 'error');
+}
+</script>
+</body>
+</html>
