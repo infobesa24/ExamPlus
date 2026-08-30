@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Assessment Sheet | Student Marks Manager</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, -apple-system, sans-serif;
+        background: #f0f4f8;
+        min-height: 100vh;
+      }
+
+      /* LOGIN CONTAINER - MODERN CENTERED */
+      .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #0d3b4c 0%, #1a5a6e 100%);
+        margin: 0;
+        padding: 20px;
+        z-index: 1000;
+        overflow-y: auto;
+      }
+
+      /* RESPONSIVE LOGIN BOX */
+      .login-box {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 48px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        padding: 40px 32px;
+        width: 100%;
+        max-width: 520px;
+        text-align: center;
+        animation: fadeSlideUp 0.4s ease-out;
+      }
+
+      @media (max-width: 560px) {
+        .login-box {
+          border-radius: 36px;
+          padding: 32px 24px;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .login-box {
+          border-radius: 28px;
+          padding: 28px 20px;
+        }
+      }
+
+      .login-box h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0a2b3e;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .login-box h2::before {
+        content: "📋";
+        font-size: 2rem;
+      }
+
+      @media (max-width: 480px) {
+        .login-box h2 {
+          font-size: 1.6rem;
+        }
+        .login-box h2::before {
+          font-size: 1.6rem;
+        }
+      }
+
+      .subtitle {
+        color: #5a7a9a;
+        font-size: 0.9rem;
+        margin-bottom: 32px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 16px;
+      }
+
+      /* INPUT FIELDS - TOUCH FRIENDLY */
+      .login-box input {
+        width: 100%;
+        font-size: 1rem;
+        padding: 16px 20px;
+        margin: 12px 0;
+        border: 2px solid #e2e8f0;
+        border-radius: 60px;
+        background: #ffffff;
+        transition: all 0.2s;
+        font-weight: 500;
+        color: #1e2f3e;
+        font-family: inherit;
+      }
+
+      .login-box input:focus {
+        outline: none;
+        border-color: #1e6fdf;
+        box-shadow: 0 0 0 4px rgba(30, 111, 223, 0.15);
+      }
+
+      .login-box input::placeholder {
+        font-size: 0.9rem;
+        color: #a0b8cc;
+        font-weight: 400;
+      }
+
+      /* BUTTON - LARGE TAP TARGET */
+      .login-box button {
+        width: 100%;
+        padding: 16px 24px;
+        background: linear-gradient(95deg, #19794d, #0f5e3a);
+        color: white;
+        border: none;
+        border-radius: 60px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-top: 24px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        touch-action: manipulation;
+      }
+
+      .login-box button:active {
+        transform: scale(0.97);
+        background: #0f5e3a;
+      }
+
+      .login-box button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .error {
+        color: #dc3545;
+        margin-top: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        background: #fff0f0;
+        padding: 10px 18px;
+        border-radius: 60px;
+        display: inline-block;
+        width: 100%;
+      }
+
+      .info {
+        color: #5a7a9a;
+        font-size: 0.75rem;
+        margin-top: 24px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 20px;
+        font-weight: 500;
+      }
+
+      @keyframes fadeSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* MAIN APP STYLES - RESPONSIVE */
+      .form-container {
+        display: none;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #f4f9ff;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      @media (min-width: 768px) {
+        .form-container {
+          padding: 28px 32px;
+        }
+      }
+
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 20px;
+        background: white;
+        padding: 16px 20px;
+        border-radius: 40px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2edf7;
+      }
+
+      .title-area h2 {
+        font-size: 1.3rem;
+        margin: 0;
+        color: #1a4a6f;
+        font-weight: 800;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      @media (min-width: 640px) {
+        .title-area h2 {
+          font-size: 1.6rem;
+        }
+      }
+
+      .school-badge {
+        background: #28a745;
+        color: white;
+        padding: 4px 14px;
+        border-radius: 40px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+
+      .logout-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 40px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: 0.2s;
+        touch-action: manipulation;
+      }
+
+      .logout-btn:active {
+        transform: scale(0.96);
+        background: #b02a37;
+      }
+
+      .controls-bar {
+        background: white;
+        padding: 20px;
+        border-radius: 32px;
+        margin: 16px 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 14px;
+        border: 1px solid #e9f0f5;
+      }
+
+      @media (min-width: 768px) {
+        .controls-bar {
+          padding: 24px;
+          gap: 18px;
+        }
+      }
+
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 2;
+        min-width: 180px;
+      }
+
+      .control-group label {
+        font-weight: 700;
+        color: #0b3b5f;
+        font-size: 0.8rem;
+      }
+
+      select, .controls-bar button {
+        padding: 12px 18px;
+        border-radius: 60px;
+        border: 1px solid #cbdde9;
+        background: white;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+      }
+
+      .controls-bar button {
+        background: #1e6fdf;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        min-width: 120px;
+        touch-action: manipulation;
+      }
+
+      .controls-bar button:active {
+        transform: scale(0.97);
+        background: #0f5ac2;
+      }
+
+      .controls-bar button:last-child {
+        background: #2c3e66;
+      }
+
+      .info-note {
+        background: #e3f2fd;
+        padding: 8px 16px;
+        border-radius: 40px;
+        font-size: 0.7rem;
+        color: #0a558c;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .table-wrapper {
+        overflow-x: auto;
+        margin: 20px 0 30px;
+        border-radius: 24px;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid #eaf0f6;
+        padding: 16px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+        min-width: 800px;
+      }
+
+      @media (min-width: 768px) {
+        table {
+          font-size: 0.85rem;
+        }
+      }
+
+      th, td {
+        border: 1px solid #d4e2ef;
+        padding: 10px 6px;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      th {
+        background: #1f6392;
+        color: white;
+        font-weight: 600;
+        padding: 12px 6px;
+      }
+
+      .term-header {
+        background: #235b7c;
+      }
+
+      td input {
+        width: 65px;
+        padding: 8px 4px;
+        text-align: center;
+        border: 1px solid #bacddc;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-family: inherit;
+        background: #fafffe;
+      }
+
+      @media (min-width: 640px) {
+        td input {
+          width: 75px;
+          padding: 8px 6px;
+        }
+      }
+
+      td input:focus {
+        border-color: #1e6fdf;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(30, 111, 223, 0.2);
+        background: white;
+      }
+
+      td input::placeholder {
+        color: #c0d0e0;
+        font-size: 0.65rem;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 40px;
+      }
+      .loading.active {
+        display: block;
+      }
+      .spinner {
+        border: 3px solid #e9ecef;
+        border-top: 3px solid #1e6fdf;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .loading p {
+        margin-top: 12px;
+        font-size: 0.85rem;
+        color: #5a6874;
+      }
+
+      .save-section {
+        margin-top: 16px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .save-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 60px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: 0.2s;
+        touch-action: manipulation;
+      }
+
+      .save-btn:active {
+        transform: scale(0.97);
+        background: #1e7e34;
+      }
+
+      @media print {
+        .controls-bar, .logout-btn, .dashboard-header button, .info-note, .loading, .controls-bar button, select, label, .save-section {
+          display: none !important;
+        }
+        .table-wrapper {
+          box-shadow: none;
+          border: none;
+          padding: 0;
+        }
+        td input {
+          border: none;
+          background: transparent;
+        }
+        .dashboard-header {
+          border: none;
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- LOGIN SECTION - RESPONSIVE CENTERED -->
+    <div id="loginSection" class="login-container">
+      <div class="login-box">
+        <h2>Assessment Sheet</h2>
+        <div class="subtitle">Enter your credentials to continue</div>
+        <input type="email" id="email" placeholder="Email address" autocomplete="off" inputmode="email">
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+        <button id="loginBtn" onclick="doLogin()">➡️ SIGN IN →</button>
+        <div id="error" class="error"></div>
+        <div class="info">🔐 Secure access · Use credentials from 'Users' tab</div>
+      </div>
+    </div>
+
+    <!-- MAIN ASSESSMENT DASHBOARD -->
+    <div id="formSection" class="form-container">
+      <div class="dashboard-header">
+        <div class="title-area">
+          <h2>📋 Assessment Dashboard <span id="schoolBadge" class="school-badge"></span></h2>
+        </div>
+        <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+      </div>
+
+      <div class="controls-bar">
+        <div class="control-group">
+          <label>📚 Select class (from Column A)</label>
+          <select id="classSelect">
+            <option value="">-- Select class --</option>
+          </select>
+        </div>
+        <button onclick="loadStudents()">👥 Load Students</button>
+        <button onclick="printPage()">🖨️ Print / PDF</button>
+        <div class="info-note">✨ Classes auto-synced from Column A</div>
+      </div>
+      
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Fetching student records ...</p>
+      </div>
+      
+      <div id="tableContainer" class="table-wrapper"></div>
+      
+      <div class="save-section">
+        <button class="save-btn" onclick="saveMarks()">💾 Save All Marks</button>
+      </div>
+    </div>
+
+    <script>
+      // ==================== CONFIGURATION ====================
+      // ⚠️ IMPORTANT: Replace this URL with your Google Apps Script Web App URL
+      const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbzSIu1Kf-47_lOeNU9kVVKIHUXhewukUyGNaw7z2iZj6N6YChk5okf2lUfknufZiVMUCg/exec';
+      
+      let currentTabName = null;
+      let currentRowIndex = null;
+      let currentClassName = null;
+      let loginTimeout = null;
+      let studentsData = [];
+
+      // ==================== API CALLS ====================
+      
+      function apiCall(action, data, callback) {
+        const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        
+        let url = API_BASE_URL + '?action=' + encodeURIComponent(action);
+        for (let key in data) {
+          if (data.hasOwnProperty(key) && data[key] !== null && data[key] !== undefined) {
+            url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(data[key]));
+          }
+        }
+        url += '&callback=' + callbackName;
+        
+        console.log("API Call URL:", url);
+        
+        const script = document.createElement('script');
+        script.src = url;
+        
+        window[callbackName] = function(response) {
+          console.log("API Response for " + action + ":", response);
+          delete window[callbackName];
+          if (script.parentNode) script.remove();
+          callback(response);
+        };
+        
+        script.onerror = function() {
+          console.error("Script error for action:", action);
+          delete window[callbackName];
+          if (script.parentNode) script.remove();
+          callback({ success: false, error: 'Network error' });
+        };
+        
+        setTimeout(() => {
+          if (window[callbackName]) {
+            console.warn("Timeout for action:", action);
+            delete window[callbackName];
+            if (script.parentNode) script.remove();
+            callback({ success: false, error: 'Request timeout' });
+          }
+        }, 30000);
+        
+        document.body.appendChild(script);
+      }
+
+      // ==================== LOGIN ====================
+      
+      function doLogin() {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const errorDiv = document.getElementById("error");
+        const loginBtn = document.getElementById("loginBtn");
+        
+        if (loginTimeout) clearTimeout(loginTimeout);
+        
+        if (!email || !password) {
+          errorDiv.innerText = "❌ Please enter both email and password";
+          return;
+        }
+        
+        loginBtn.disabled = true;
+        loginBtn.textContent = "⏳ SIGNING IN...";
+        errorDiv.innerText = "🔐 Authenticating...";
+        
+        loginTimeout = setTimeout(function() {
+          loginBtn.disabled = false;
+          loginBtn.textContent = "➡️ SIGN IN →";
+          errorDiv.innerText = "❌ Login timeout. Please check your connection and try again.";
+        }, 15000);
+        
+        apiCall('loginUser', { email: email, password: password }, function(result) {
+          clearTimeout(loginTimeout);
+          loginBtn.disabled = false;
+          loginBtn.textContent = "➡️ SIGN IN →";
+          
+          if (result && result.success && result.tabName) {
+            currentTabName = result.tabName;
+            currentRowIndex = result.rowIndex;
+            
+            document.getElementById("loginSection").style.display = "none";
+            document.getElementById("formSection").style.display = "block";
+            document.getElementById("schoolBadge").innerHTML = "🏫 " + currentTabName;
+            
+            loadClasses();
+          } else {
+            errorDiv.innerText = result?.error || "Access denied. No school tab mapped.";
+          }
+        });
+      }
+
+      function doLogout() {
+        currentTabName = null;
+        currentRowIndex = null;
+        document.getElementById("loginSection").style.display = "flex";
+        document.getElementById("formSection").style.display = "none";
+        document.getElementById("email").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("error").innerText = "";
+        document.getElementById("tableContainer").innerHTML = "";
+        const classSelect = document.getElementById("classSelect");
+        if(classSelect) classSelect.innerHTML = '<option value="">-- Select class --</option>';
+        
+        const loginBtn = document.getElementById("loginBtn");
+        if(loginBtn) {
+          loginBtn.disabled = false;
+          loginBtn.textContent = "➡️ SIGN IN →";
+        }
+      }
+
+      // ==================== CLASSES ====================
+
+      function loadClasses() {
+        const select = document.getElementById("classSelect");
+        select.innerHTML = '<option value="">⏳ Fetching classes...</option>';
+        
+        apiCall('getClassNamesFromColumnC', { tabName: currentTabName }, function(classes) {
+          select.innerHTML = '<option value="">-- Select Class from Column A --</option>';
+          if (!classes || classes.length === 0) {
+            select.innerHTML = '<option value="">⚠️ No classes found in Column A</option>';
+            return;
+          }
+          classes.forEach(className => {
+            const option = document.createElement("option");
+            option.value = className;
+            option.textContent = className;
+            select.appendChild(option);
+          });
+        });
+      }
+
+      // ==================== STUDENTS ====================
+
+      function loadStudents() {
+        const className = document.getElementById("classSelect").value;
+        if (!className || className.includes("Select") || className.includes("Loading") || className.includes("Fetching")) {
+          alert("📢 Please select a valid class from the dropdown.");
+          return;
+        }
+        
+        currentClassName = className;
+        const loadingEl = document.getElementById("loading");
+        loadingEl.classList.add("active");
+        document.getElementById("tableContainer").innerHTML = "";
+        
+        apiCall('getStudentsDataByClass', { 
+          tabName: currentTabName, 
+          className: className 
+        }, function(studentsData) {
+          loadingEl.classList.remove("active");
+          if (studentsData && studentsData.length > 0) {
+            buildTable(studentsData, className);
+          } else {
+            document.getElementById("tableContainer").innerHTML = `<div style="padding: 20px; text-align:center;">📭 No student records found for class "${className}".</div>`;
+          }
+        });
+      }
+
+      // ==================== BUILD TABLE ====================
+
+      function buildTable(data, className) {
+        studentsData = data;
+        
+        if (!data || data.length === 0) {
+          document.getElementById("tableContainer").innerHTML = `<div style="padding: 20px; text-align:center;">📭 No student records found for class "${className}".</div>`;
+          return;
+        }
+
+        let html = `
+          <div>
+            <h3 style="text-align:center; margin: 10px 0 20px; font-size:1.2rem; font-weight:700; color:#1f4e6e;">📖 Class: ${className}</h3>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th rowspan="2">Roll No</th>
+                    <th rowspan="2">Student Name</th>
+                    <th colspan="3" class="term-header">📘 First Term</th>
+                    <th colspan="3" class="term-header">📙 Second Term</th>
+                    <th colspan="3" class="term-header">📗 Third Term</th>
+                  </tr>
+                  <tr>
+                    <th>Test 1</th><th>Test 2</th><th>Exam</th>
+                    <th>Test 1</th><th>Test 2</th><th>Exam</th>
+                    <th>Test 1</th><th>Test 2</th><th>Exam</th>
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+
+        for (let i = 0; i < data.length; i++) {
+          const row = data[i];
+          const rollNo = row[0] || '';
+          const studentName = row[1] || '';
+          html += `
+            <tr>
+              <td style="font-weight:600;">${rollNo}</td>
+              <td style="text-align:left; font-weight:500;">${escapeHtml(studentName)}</td>
+              <td><input type="text" class="mark-input" data-term="1t1_${i}" placeholder=""></td>
+              <td><input type="text" class="mark-input" data-term="1t2_${i}" placeholder=""></td>
+              <td><input type="text" class="mark-input" data-term="1e_${i}" placeholder=""></td>
+              <td><input type="text" class="mark-input" data-term="2t1_${i}" placeholder=""></td>
+              <td><input type="text" class="mark-input" data-term="2t2_${i}" placeholder=""></td>
+              <td><input type="text" class="mark-input" data-term="2e_${i}" placeholder=""></td>
+              <td><input type="text" class="mark-input" data-term="3t1_${i}" placeholder=""></td>
+              <td><input type="text" class="mark-input" data-term="3t2_${i}" placeholder=""></td>
+              <td><input type="text" class="mark-input" data-term="3e_${i}" placeholder=""></td>
+            </tr>
+          `;
+        }
+
+        html += `
+                </tbody>
+              </table>
+            </div>
+            <div class="info-note" style="margin-top: 16px; display: inline-block;">✏️ Enter marks in the fields – Click "Save All Marks" to save</div>
+          </div>
+        `;
+        document.getElementById("tableContainer").innerHTML = html;
+      }
+      
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+          if (m === '&') return '&';
+          if (m === '<') return '<';
+          if (m === '>') return '>';
+          return m;
+        });
+      }
+
+      // ==================== SAVE MARKS ====================
+
+      function saveMarks() {
+        const className = document.getElementById("classSelect").value;
+        if (!className) {
+          alert("Please select a class first.");
+          return;
+        }
+        
+        // Collect all marks from input fields
+        const inputs = document.querySelectorAll('.mark-input');
+        const marksData = {};
+        let hasMarks = false;
+        
+        inputs.forEach(function(input) {
+          const term = input.getAttribute('data-term');
+          const value = input.value.trim();
+          if (value) {
+            marksData[term] = value;
+            hasMarks = true;
+          }
+        });
+        
+        if (!hasMarks) {
+          alert("No marks entered to save.");
+          return;
+        }
+        
+        // Show saving indicator
+        const saveBtn = document.querySelector('.save-btn');
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = "⏳ Saving...";
+        saveBtn.disabled = true;
+        
+        // Here you would call your backend to save
+        // For now, just show a success message
+        setTimeout(function() {
+          saveBtn.textContent = "✅ Saved!";
+          setTimeout(function() {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+          }, 1500);
+        }, 1000);
+        
+        // Uncomment this when you have the backend save function ready
+        /*
+        apiCall('saveMarks', {
+          tabName: currentTabName,
+          className: className,
+          marksData: marksData
+        }, function(result) {
+          saveBtn.textContent = originalText;
+          saveBtn.disabled = false;
+          if (result && result.success) {
+            alert("✅ Marks saved successfully!");
+          } else {
+            alert("❌ Failed to save marks: " + (result?.message || "Unknown error"));
+          }
+        });
+        */
+      }
+
+      // ==================== PRINT ====================
+
+      function printPage() {
+        window.print();
+      }
+
+      // ==================== INITIALIZATION ====================
+
+      window.onload = function() {
+        document.getElementById("loginSection").style.display = "flex";
+        document.getElementById("formSection").style.display = "none";
+        
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        
+        function handleEnter(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            doLogin();
+          }
+        }
+        
+        if (emailInput) emailInput.addEventListener('keypress', handleEnter);
+        if (passwordInput) passwordInput.addEventListener('keypress', handleEnter);
+      };
+    </script>
+  </body>
+</html>
