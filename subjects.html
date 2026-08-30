@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Subject Registration · Admin Portal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background: #f5f7fb;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, -apple-system, 'Arial', sans-serif;
+      background: #f5f7fb;
+      min-height: 100vh;
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    /* ===== VIBRATING ICON (entry point) - LIGHT BLUE ===== */
+    .icon-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 80vh;
+    }
+
+    .vibrating-icon {
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #7ec8e3, #4a9fc7);
+      box-shadow: 
+        0 12px 28px rgba(0, 0, 0, 0.6),
+        0 0 0 4px rgba(255, 255, 255, 0.08),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 4px 8px rgba(255, 255, 255, 0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      animation: vibrate 2.4s infinite ease-in-out, glowPulse 3.2s infinite alternate;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: 0.03em;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      line-height: 1.2;
+      padding: 16px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+    }
+
+    .vibrating-icon .ripple {
+      position: absolute;
+      border-radius: 50%;
+      border: 3px solid rgba(74, 159, 199, 0.4);
+      animation: rippleEffect 2s ease-out infinite;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .vibrating-icon .ripple:nth-child(2) {
+      animation-delay: 0.7s;
+    }
+
+    @keyframes rippleEffect {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    @keyframes vibrate {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      10% { transform: translate(-2px, -2px) rotate(-0.6deg); }
+      20% { transform: translate(2px, -1px) rotate(0.8deg); }
+      30% { transform: translate(-1px, 2px) rotate(-0.4deg); }
+      40% { transform: translate(1px, -2px) rotate(0.6deg); }
+      50% { transform: translate(-2px, 1px) rotate(-0.8deg); }
+      60% { transform: translate(2px, 2px) rotate(0.4deg); }
+      70% { transform: translate(-1px, -1px) rotate(-0.3deg); }
+      80% { transform: translate(1px, 1px) rotate(0.3deg); }
+      90% { transform: translate(-1px, 1px) rotate(-0.2deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    @keyframes glowPulse {
+      0% { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(255, 255, 255, 0.06), inset 0 -4px 8px rgba(0, 0, 0, 0.3), inset 0 4px 8px rgba(255, 255, 255, 0.12); }
+      100% { box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 6px rgba(255, 255, 255, 0.12), inset 0 -4px 8px rgba(0, 0, 0, 0.4), inset 0 4px 8px rgba(255, 255, 255, 0.18); }
+    }
+
+    .vibrating-icon:active {
+      transform: scale(0.92);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8), 0 0 0 4px rgba(255, 255, 255, 0.15);
+      animation: none;
+      transition: transform 0.06s;
+    }
+
+    @media (max-width: 480px) {
+      .vibrating-icon {
+        width: 160px;
+        height: 160px;
+        font-size: 0.95rem;
+        padding: 12px;
+      }
+    }
+    @media (max-width: 360px) {
+      .vibrating-icon {
+        width: 140px;
+        height: 140px;
+        font-size: 0.85rem;
+        padding: 10px;
+      }
+    }
+
+    /* ===== LOGIN OVERLAY ===== */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 20px;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .login-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .login-box {
+      background: #ffffff;
+      padding: 32px 24px 44px;
+      border-radius: 48px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      border: 1px solid #eef2f8;
+      animation: floatIn 0.4s ease;
+    }
+
+    @keyframes floatIn {
+      0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .login-box h2 {
+      color: #1e3c2c;
+      margin-bottom: 8px;
+      font-weight: 800;
+      font-size: 1.8rem;
+      letter-spacing: -0.5px;
+    }
+
+    .login-box .admin-badge {
+      display: inline-block;
+      background: #1e5a48;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 4px 16px;
+      border-radius: 40px;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .login-box .sub {
+      color: #5588a7;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 16px 20px;
+      margin: 14px 0;
+      border: 2px solid #e2e8f0;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 500;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      outline: none;
+      color: #1e2a3a;
+    }
+
+    .login-box input:focus {
+      border-color: #0f9d58;
+      box-shadow: 0 0 0 4px rgba(15, 157, 88, 0.12);
+    }
+
+    .login-box input::placeholder {
+      color: #9aaec2;
+      font-weight: 450;
+      font-size: 0.9rem;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 16px 20px;
+      margin-top: 20px;
+      background: #0f9d58;
+      color: white;
+      border: none;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 3px 8px rgba(15, 157, 88, 0.2);
+      touch-action: manipulation;
+    }
+
+    .login-box button:active {
+      transform: scale(0.97);
+      background: #0b7e48;
+    }
+
+    .login-box button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .login-box .error {
+      margin-top: 20px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      background: #fef2f2;
+      padding: 10px 18px;
+      border-radius: 60px;
+      color: #dc3545;
+      display: none;
+      width: 100%;
+    }
+
+    .login-box .error.show {
+      display: inline-block;
+    }
+
+    .close-login {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      color: white;
+      font-size: 32px;
+      font-weight: 300;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      background: rgba(255,255,255,0.1);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .close-login:hover { background: rgba(255,255,255,0.2); }
+    .close-login:active { transform: scale(0.92); }
+
+    /* ========= FORM CONTAINER - RESPONSIVE ========= */
+    .form-container {
+      display: none;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      padding: 24px 20px 32px;
+      background: #ffffff;
+      border-radius: 32px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+      border: 1px solid #eef2f8;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    
+    .header-info {
+      margin-bottom: 24px;
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .header-info h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #1e3c2c;
+      margin: 0;
+      flex: 1;
+    }
+    
+    .logout-btn {
+      background: #f8fafc;
+      color: #dc3545;
+      border: 1px solid #e2e8f0;
+      padding: 8px 20px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.8rem;
+      transition: 0.2s;
+      touch-action: manipulation;
+    }
+    
+    .logout-btn:active {
+      transform: scale(0.96);
+      background: #fee;
+    }
+    
+    .school-badge {
+      background: #e8f5e9;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #2e7d32;
+      text-align: center;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    
+    .info-note {
+      background: #e3f2fd;
+      padding: 12px 16px;
+      border-radius: 28px;
+      margin-bottom: 24px;
+      font-size: 0.75rem;
+      color: #1565c0;
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #1e3c2c;
+      font-size: 0.85rem;
+    }
+    
+    .row-2cols {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .row-2cols input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e2e8f0;
+      border-radius: 60px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    
+    .row-2cols input:focus {
+      outline: none;
+      border-color: #0f9d58;
+      box-shadow: 0 0 0 3px rgba(15, 157, 88, 0.1);
+    }
+    
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .subject-card {
+      background: #f8fafc;
+      border-radius: 24px;
+      padding: 14px 16px;
+      border: 1px solid #eef2f8;
+      transition: all 0.2s ease;
+    }
+    
+    .subject-card label {
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+      color: #1e3c2c;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .subject-card label span {
+      font-size: 0.65rem;
+      color: #7c8b9c;
+      font-weight: normal;
+    }
+    
+    .subject-card input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    
+    .subject-card input:focus {
+      outline: none;
+      border-color: #0f9d58;
+      box-shadow: 0 0 0 3px rgba(15, 157, 88, 0.1);
+    }
+    
+    .submit-btn {
+      margin-top: 24px;
+      padding: 16px 24px;
+      background: #0f9d58;
+      color: white;
+      border: none;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      touch-action: manipulation;
+    }
+    
+    .submit-btn:active {
+      transform: scale(0.97);
+      background: #0b7e48;
+    }
+    
+    .submit-btn:disabled {
+      background: #9aaec2;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      padding: 14px 20px;
+      margin: 16px 0;
+      border-radius: 60px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: none;
+    }
+    
+    .success-message.error {
+      background: #fef2f2;
+      color: #dc3545;
+      border-color: #f5c6cb;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .loading.active {
+      display: block;
+    }
+    
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #0f9d58;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading p {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #5a6874;
+    }
+    
+    .test-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .test-btn:active { transform: scale(0.96); }
+    
+    /* Tablet screens */
+    @media (min-width: 640px) {
+      body {
+        padding: 20px;
+      }
+      .subjects-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+      }
+      .row-2cols {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .header-info h2 {
+        font-size: 1.6rem;
+      }
+    }
+    
+    /* Desktop screens */
+    @media (min-width: 1024px) {
+      body {
+        padding: 30px;
+      }
+      .form-container {
+        padding: 36px 40px 48px;
+      }
+      .subjects-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .header-info h2 {
+        font-size: 1.8rem;
+      }
+      .login-box {
+        max-width: 520px;
+        padding: 40px 36px 52px;
+      }
+      .login-box h2 {
+        font-size: 2.2rem;
+      }
+      .login-box input {
+        padding: 18px 24px;
+        font-size: 1rem;
+      }
+      .login-box button {
+        padding: 18px 24px;
+        font-size: 1.1rem;
+      }
+    }
+    
+    /* Large desktop */
+    @media (min-width: 1400px) {
+      .subjects-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .form-container {
+        max-width: 1600px;
+      }
+    }
+    
+    /* Touch-friendly adjustments */
+    button, .logout-btn, .submit-btn {
+      touch-action: manipulation;
+      cursor: pointer;
+    }
+    
+    /* Remove hover effects on mobile for better feedback */
+    @media (hover: none) and (pointer: coarse) {
+      .login-box button:hover, .submit-btn:hover, .logout-btn:hover {
+        transform: none;
+      }
+    }
+    
+    /* Column hint styling */
+    .col-hint {
+      font-size: 0.6rem;
+      color: #7c8b9c;
+      background: #eef2f8;
+      padding: 2px 8px;
+      border-radius: 30px;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== VIBRATING ICON (entry point) - LIGHT BLUE ===== -->
+  <div class="icon-wrapper" id="iconWrapper">
+    <div class="vibrating-icon" id="launcherIcon" role="button" aria-label="Subject Registration">
+      <span class="ripple"></span>
+      <span class="ripple"></span>
+      Subject<br />Registration
+    </div>
+  </div>
+
+  <!-- ===== LOGIN OVERLAY ===== -->
+  <div class="login-overlay" id="loginOverlay">
+    <span class="close-login" id="closeLoginBtn">✕</span>
+    <div class="login-box">
+      <div class="admin-badge">🔐 ADMIN ONLY</div>
+      <h2>📚 Subject Registration</h2>
+      <div class="sub">Secure admin access to manage subjects & resumption</div>
+      <input type="email" id="email" placeholder="Email address" autocomplete="off" inputmode="email">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+      <button onclick="doLogin()">→ LOGIN →</button>
+      <div id="loginError" class="error"></div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN FORM SECTION ===== -->
+  <div id="formSection" class="form-container">
+    <div class="header-info">
+      <h2>🏫 Subject & Resumption Management</h2>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+    <div id="schoolBadge" class="school-badge"></div>
+    
+    <div class="info-note">
+      📌 Each subject uses 3 merged columns (K1:M1, N1:P1, etc.) - 20 Subjects total
+    </div>
+    
+    <div id="successMessage" class="success-message"></div>
+    
+    <div class="row-2cols">
+      <div class="form-group">
+        <label>📅 Resumption Date</label>
+        <input type="text" id="resumptionDate" placeholder="e.g., Monday, September 2nd, 2024">
+      </div>
+      <div></div>
+    </div>
+    
+    <div class="subjects-grid" id="subjectsGrid"></div>
+    
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Saving subjects...</p>
+    </div>
+    
+    <button class="submit-btn" id="submitBtn" onclick="submitData()">💾 Save All Subjects & Resumption Date</button>
+  </div>
+
+  <script>
+    // ==================== CONFIGURATION ====================
+    const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwt-jMeQXAI43J-VlwYbsS0yveECEUa0JKvRU-bZ45iQaIiSrvHh3pkAmyg4jI0rwYA1Q/exec';
+    
+    // ==================== STATE ====================
+    let currentTabName = null;
+    let currentRowIndex = null;
+    const TOTAL_SUBJECTS = 20;
+    
+    // ==================== ICON LOGIC ====================
+    function showLoginOverlay() {
+      document.getElementById('loginOverlay').classList.add('active');
+      if (navigator.vibrate) navigator.vibrate(10);
+      setTimeout(() => document.getElementById('email').focus(), 300);
+    }
+
+    function hideLoginOverlay() {
+      document.getElementById('loginOverlay').classList.remove('active');
+      document.getElementById('loginError').classList.remove('show');
+    }
+
+    // ==================== API CALL FUNCTIONS ====================
+    
+    function apiCallWithCallback(action, data, callback) {
+      const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+      
+      let url = API_BASE_URL + '?action=' + encodeURIComponent(action);
+      for (let key in data) {
+        if (data.hasOwnProperty(key) && data[key] !== null && data[key] !== undefined) {
+          url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(data[key]));
+        }
+      }
+      url += '&callback=' + callbackName;
+      
+      const script = document.createElement('script');
+      script.src = url;
+      
+      window[callbackName] = function(response) {
+        delete window[callbackName];
+        if (script.parentNode) script.remove();
+        callback(response);
+      };
+      
+      script.onerror = function() {
+        delete window[callbackName];
+        if (script.parentNode) script.remove();
+        callback({ success: false, error: 'Network error or invalid response' });
+      };
+      
+      const timeoutId = setTimeout(() => {
+        if (window[callbackName]) {
+          delete window[callbackName];
+          if (script.parentNode) script.remove();
+          callback({ success: false, error: 'Request timeout' });
+        }
+      }, 30000);
+      
+      const originalCallback = window[callbackName];
+      window[callbackName] = function(response) {
+        clearTimeout(timeoutId);
+        originalCallback(response);
+      };
+      
+      document.body.appendChild(script);
+    }
+    
+    // ==================== UI FUNCTIONS ====================
+    
+    function showMessage(message, isError = false) {
+      const successDiv = document.getElementById("successMessage");
+      successDiv.innerHTML = message;
+      successDiv.style.display = "block";
+      if (isError) {
+        successDiv.className = "success-message error";
+      } else {
+        successDiv.className = "success-message";
+      }
+      setTimeout(function() {
+        successDiv.style.display = "none";
+      }, 5000);
+    }
+    
+    function escapeHtml(t) { 
+      if(!t) return ''; 
+      return String(t).replace(/[&<>]/g, function(m){ 
+        if(m==='&') return '&'; 
+        if(m==='<') return '<'; 
+        if(m==='>') return '>'; 
+        return m;
+      }); 
+    }
+    
+    // ==================== LOGIN - ADMIN ONLY ====================
+    
+    function doLogin() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const errorDiv = document.getElementById("loginError");
+      
+      if (!email || !password) {
+        errorDiv.textContent = "⚠️ Please enter email and password";
+        errorDiv.classList.add('show');
+        return;
+      }
+      
+      const loginBtn = document.querySelector('.login-box button');
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = "Authenticating... <span class='spinner'></span>";
+      errorDiv.classList.remove('show');
+      
+      apiCallWithCallback('loginUser', {
+        email: email,
+        password: password
+      }, function(result) {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = "→ LOGIN →";
+        
+        if (result && result.success) {
+          const role = result.role ? result.role.toUpperCase() : '';
+          
+          if (role === 'ADMIN') {
+            currentTabName = result.tabName;
+            currentRowIndex = result.rowIndex;
+            
+            document.getElementById("loginOverlay").classList.remove('active');
+            document.getElementById("iconWrapper").style.display = "none";
+            document.getElementById("formSection").style.display = "block";
+            document.getElementById("schoolBadge").innerHTML = "🏫 School: " + escapeHtml(currentTabName);
+            createSubjectsGrid();
+            loadData();
+            showMessage("✅ Login successful! Loading data...", false);
+          } else {
+            errorDiv.textContent = "❌ Access denied. Admin privileges required.";
+            errorDiv.classList.add('show');
+          }
+        } else {
+          errorDiv.textContent = result?.error || "Login failed. Please verify credentials.";
+          errorDiv.classList.add('show');
+        }
+      });
+    }
+    
+    function doLogout() {
+      currentTabName = null;
+      currentRowIndex = null;
+      
+      document.getElementById("formSection").style.display = "none";
+      document.getElementById("iconWrapper").style.display = "flex";
+      document.getElementById("loginOverlay").classList.remove('active');
+      
+      document.getElementById("email").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("loginError").classList.remove('show');
+      
+      // Reset login button
+      const loginBtn = document.querySelector('.login-box button');
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = "→ LOGIN →";
+      
+      document.getElementById("successMessage").style.display = "none";
+    }
+    
+    // ==================== SUBJECTS GRID ====================
+    
+    function createSubjectsGrid() {
+      const grid = document.getElementById("subjectsGrid");
+      grid.innerHTML = '';
+      
+      for (let i = 1; i <= TOTAL_SUBJECTS; i++) {
+        const colLetter = getColumnRange(i);
+        const card = document.createElement("div");
+        card.className = "subject-card";
+        card.innerHTML = `
+          <label>
+            📖 Subject ${i}
+            <span class="col-hint">${colLetter}</span>
+          </label>
+          <input type="text" id="subject${i}" placeholder="Subject ${i} name" autocomplete="off">
+        `;
+        grid.appendChild(card);
+      }
+    }
+    
+    function getColumnRange(subjectNum) {
+      const startCol = 10 + ((subjectNum - 1) * 3);
+      const endCol = startCol + 2;
+      return getColumnLetter(startCol) + ":" + getColumnLetter(endCol);
+    }
+    
+    function getColumnLetter(col) {
+      let letter = "";
+      while (col >= 0) {
+        letter = String.fromCharCode(65 + (col % 26)) + letter;
+        col = Math.floor(col / 26) - 1;
+      }
+      return letter;
+    }
+    
+    // ==================== DATA LOADING ====================
+    
+    function loadData() {
+      apiCallWithCallback('fetchSheetData', {
+        tabName: currentTabName
+      }, function(data) {
+        if (data && !data.error) {
+          const resumptionField = document.getElementById('resumptionDate');
+          if (resumptionField) {
+            resumptionField.value = data.resumptionDate || '';
+          }
+          for (let i = 1; i <= TOTAL_SUBJECTS; i++) {
+            const field = document.getElementById('subject' + i);
+            if (field && data['subject' + i]) {
+              field.value = data['subject' + i];
+            }
+          }
+          showMessage("✅ Data loaded successfully!", false);
+        } else if (data && data.error) {
+          console.error("Data fetch error:", data.error);
+          showMessage("⚠️ Could not load existing data: " + data.error, true);
+        }
+      });
+    }
+    
+    // ==================== SUBMIT DATA ====================
+    
+    function submitData() {
+      const submitBtn = document.getElementById("submitBtn");
+      const loading = document.getElementById("loading");
+      
+      const resumptionDate = document.getElementById('resumptionDate').value.trim();
+      if (!resumptionDate) {
+        showMessage("⚠️ Please enter the resumption date", true);
+        return;
+      }
+      
+      submitBtn.disabled = true;
+      loading.classList.add("active");
+      
+      const formData = {
+        resumptionDate: resumptionDate
+      };
+      for (let i = 1; i <= TOTAL_SUBJECTS; i++) {
+        const field = document.getElementById('subject' + i);
+        if (field) {
+          formData['subject' + i] = field.value;
+        }
+      }
+      
+      apiCallWithCallback('submitSheetData', {
+        tabName: currentTabName,
+        formData: formData
+      }, function(response) {
+        submitBtn.disabled = false;
+        loading.classList.remove("active");
+        
+        if (response && response.success) {
+          showMessage(response.message || "✅ Data saved successfully!", false);
+        } else {
+          showMessage("❌ Error saving data: " + (response?.error || "Unknown error"), true);
+        }
+      });
+    }
+    
+    // ==================== EVENT LISTENERS ====================
+    document.getElementById("launcherIcon").addEventListener("click", showLoginOverlay);
+    document.getElementById("closeLoginBtn").addEventListener("click", hideLoginOverlay);
+
+    document.getElementById("loginOverlay").addEventListener("click", function(e) {
+      if (e.target === this) hideLoginOverlay();
+    });
+
+    document.getElementById("password").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") doLogin();
+    });
+
+    window.addEventListener('load', function() {
+      document.getElementById('iconWrapper').style.display = 'flex';
+      document.getElementById('formSection').style.display = 'none';
+      document.getElementById('loginOverlay').classList.remove('active');
+    });
+  </script>
+</body>
+</html>
