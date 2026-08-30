@@ -1,1 +1,426 @@
-Updated — the ledger now has just `report.html` as the real entry, with a commented example block right below it showing exactly how to add more later. Whenever you add another `.html` file to the repo, just copy that comment pattern, uncomment, and fill in the four fields.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXAMPLUS — Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f1115;
+    --ink-2:#161922;
+    --paper:#efead9;
+    --paper-dim:#a9a58f;
+    --amber:#e3a23d;
+    --phosphor:#4fd1a5;
+    --rust:#c1584b;
+    --line:#2a2e38;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    background-image:
+      radial-gradient(ellipse at top left, rgba(227,162,61,0.06), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(79,209,165,0.05), transparent 50%);
+    color:var(--paper);
+    font-family:'JetBrains Mono', monospace;
+    min-height:100vh;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber); color:var(--ink);}
+
+  a{color:inherit;}
+
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:32px 20px 64px;
+  }
+
+  /* ---- top bar ---- */
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12px;
+    color:var(--paper-dim);
+    letter-spacing:.02em;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:28px;
+  }
+  .topbar .who span{color:var(--phosphor);}
+  #clock{color:var(--paper-dim); font-variant-numeric:tabular-nums;}
+
+  /* ---- boot / hero ---- */
+  .boot{
+    font-size:13px;
+    color:var(--phosphor);
+    min-height:1.4em;
+    margin-bottom:10px;
+    white-space:pre-wrap;
+  }
+  .boot .cursor{
+    display:inline-block;
+    width:7px; height:1em;
+    background:var(--phosphor);
+    margin-left:2px;
+    vertical-align:-2px;
+    animation:blink 1s steps(1) infinite;
+  }
+  @keyframes blink{50%{opacity:0;}}
+
+  .hero{margin-bottom:8px;}
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:10px;
+    opacity:0;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(2.3rem, 7vw, 3.6rem);
+    line-height:1.02;
+    margin:0 0 6px;
+    color:var(--paper);
+    opacity:0;
+  }
+  h1 em{
+    font-style:italic;
+    font-weight:300;
+    color:var(--paper-dim);
+  }
+  .tagline{
+    font-size:13px;
+    color:var(--paper-dim);
+    max-width:52ch;
+    margin:0 0 30px;
+    opacity:0;
+  }
+  .reveal{animation:rise .7s ease forwards;}
+  @keyframes rise{
+    from{opacity:0; transform:translateY(6px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  /* ---- filters ---- */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    margin-bottom:6px;
+    padding-bottom:16px;
+    border-bottom:1px dashed var(--line);
+  }
+  .chip{
+    font-family:inherit;
+    font-size:11px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    background:transparent;
+    color:var(--paper-dim);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:6px 13px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--paper-dim); color:var(--paper);}
+  .chip.active{background:var(--amber); color:var(--ink); border-color:var(--amber); font-weight:600;}
+
+  .search{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:6px 13px;
+    min-width:170px;
+  }
+  .search input{
+    background:none; border:none; outline:none;
+    font-family:inherit; font-size:12px;
+    color:var(--paper); width:100%;
+  }
+  .search input::placeholder{color:var(--paper-dim);}
+  .search::before{content:"grep";color:var(--paper-dim); font-size:11px;}
+
+  /* ---- ledger ---- */
+  .ledger{margin-top:22px;}
+  .row-head{
+    display:grid;
+    grid-template-columns:34px 1fr 90px 100px;
+    gap:14px;
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    padding:0 16px 8px;
+  }
+  .row-head span:last-child, .row-head span:nth-child(3){text-align:right;}
+
+  .entry{
+    display:grid;
+    grid-template-columns:34px 1fr 90px 100px;
+    align-items:center;
+    gap:14px;
+    padding:16px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+    margin-bottom:10px;
+    text-decoration:none;
+    transition:border-color .15s ease, transform .15s ease, background .15s ease;
+  }
+  .entry:hover{
+    border-color:var(--amber);
+    transform:translateX(2px);
+    background:linear-gradient(180deg, rgba(227,162,61,0.06), transparent);
+  }
+  .entry:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+
+  .num{
+    color:var(--paper-dim);
+    font-size:12px;
+  }
+  .meta .file{
+    display:block;
+    color:var(--paper);
+    font-weight:600;
+    font-size:14px;
+    margin-bottom:3px;
+  }
+  .meta .file::before{content:"./"; color:var(--paper-dim); font-weight:400;}
+  .meta .desc{
+    color:var(--paper-dim);
+    font-size:12px;
+    font-style:italic;
+    font-family:'Fraunces', serif;
+  }
+  .tag{
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    text-align:right;
+  }
+  .status{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:7px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+  .dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+  .dot.stable{background:var(--phosphor); box-shadow:0 0 6px var(--phosphor);}
+  .dot.beta{background:var(--amber); box-shadow:0 0 6px var(--amber);}
+  .dot.broken{background:var(--rust); box-shadow:0 0 6px var(--rust);}
+
+  .empty{
+    text-align:center;
+    color:var(--paper-dim);
+    font-style:italic;
+    font-family:'Fraunces', serif;
+    padding:40px 0;
+    font-size:14px;
+  }
+
+  footer{
+    margin-top:44px;
+    padding-top:18px;
+    border-top:1px solid var(--line);
+    font-size:11px;
+    color:var(--paper-dim);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  footer .prompt::before{content:"$ ";color:var(--phosphor);}
+
+  @media (max-width:560px){
+    .row-head{display:none;}
+    .entry{grid-template-columns:24px 1fr; grid-template-areas:"n m" ". s"; row-gap:8px;}
+    .num{grid-area:n;}
+    .meta{grid-area:m;}
+    .tag{display:none;}
+    .status{grid-area:s; justify-content:flex-start;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+    .reveal{opacity:1 !important; transform:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="who">user@examplus<span>:~$</span></div>
+    <div id="clock">--:--:--</div>
+  </div>
+
+  <div class="boot" id="boot"></div>
+
+  <div class="hero">
+    <div class="eyebrow reveal" style="animation-delay:.05s">Ahmad's build ledger</div>
+    <h1 class="reveal" style="animation-delay:.15s">EXAMPLUS<br><em>console</em></h1>
+    <p class="tagline reveal" style="animation-delay:.25s">Every app on this page was written on a phone, one heredoc at a time, and compiled by GitHub Actions. This is where they all live.</p>
+  </div>
+
+  <div class="controls">
+    <button class="chip active" data-filter="all">All</button>
+    <button class="chip" data-filter="stable">Stable</button>
+    <button class="chip" data-filter="beta">Beta</button>
+    <button class="chip" data-filter="tool">Tools</button>
+    <div class="search">
+      <input id="search" type="text" placeholder="filename or tag" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="ledger">
+    <div class="row-head">
+      <span>No.</span><span>Entry</span><span>Tag</span><span>Status</span>
+    </div>
+    <div id="entries"></div>
+    <div class="empty" id="empty" style="display:none;">no match — check the filename in the ledger config</div>
+  </div>
+
+  <footer>
+    <span class="prompt">built in Termux, no local SDK, no local mercy</span>
+    <span id="count"></span>
+  </footer>
+
+</div>
+
+<script>
+/* ============================================================
+   LEDGER CONFIG — edit this list to match the files in your repo.
+   file:   relative path to the .html file in this same repository
+   title:  display name
+   desc:   one-line description
+   status: "stable" | "beta" | "broken"
+   tag:    "app" | "tool" | "game"  (used by the Tools filter)
+   ============================================================ */
+const APPS = [
+  {
+    file: "report.html",
+    title: "Report Cards",
+    desc: "Grades, class ranking, mobile-friendly PDF export.",
+    status: "stable",
+    tag: "app"
+  }
+
+  /* Add more entries below as you add files to the repo, e.g:
+  ,{
+    file: "examplus.html",
+    title: "EXAMPLUS",
+    desc: "Role-based school management — Admin, Bursar, Teacher.",
+    status: "stable",
+    tag: "app"
+  }
+  */
+];
+/* ============================================================ */
+
+const entriesEl = document.getElementById('entries');
+const emptyEl = document.getElementById('empty');
+const countEl = document.getElementById('count');
+let activeFilter = 'all';
+let query = '';
+
+function render(){
+  const filtered = APPS.filter(a => {
+    const matchesFilter =
+      activeFilter === 'all' ||
+      (activeFilter === 'tool' && (a.tag === 'tool' || a.tag === 'game')) ||
+      a.status === activeFilter;
+    const q = query.trim().toLowerCase();
+    const matchesQuery = !q || a.title.toLowerCase().includes(q) || a.file.toLowerCase().includes(q) || a.tag.toLowerCase().includes(q);
+    return matchesFilter && matchesQuery;
+  });
+
+  entriesEl.innerHTML = filtered.map((a, i) => `
+    <a class="entry" href="${a.file}">
+      <span class="num">${String(i+1).padStart(2,'0')}</span>
+      <span class="meta">
+        <span class="file">${a.file}</span>
+        <span class="desc">${a.desc}</span>
+      </span>
+      <span class="tag">${a.tag}</span>
+      <span class="status"><span class="dot ${a.status}"></span>${a.status}</span>
+    </a>
+  `).join('');
+
+  emptyEl.style.display = filtered.length ? 'none' : 'block';
+  countEl.textContent = `${filtered.length} of ${APPS.length} entries`;
+}
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFilter = chip.dataset.filter;
+    render();
+  });
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  query = e.target.value;
+  render();
+});
+
+render();
+
+/* clock */
+function tick(){
+  const d = new Date();
+  document.getElementById('clock').textContent = d.toLocaleTimeString('en-GB', { hour12:false });
+}
+tick();
+setInterval(tick, 1000);
+
+/* boot sequence typewriter — skipped for reduced-motion users */
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const bootEl = document.getElementById('boot');
+const bootLines = ['$ whoami', 'ahmad', '$ ls *.html | wc -l', String(APPS.length), '$ ./launch --ready'];
+
+if (prefersReduced) {
+  bootEl.textContent = '';
+} else {
+  let li = 0, ci = 0, out = '';
+  function typeBoot(){
+    if (li >= bootLines.length){
+      bootEl.innerHTML = out;
+      return;
+    }
+    const line = bootLines[li];
+    if (ci <= line.length){
+      bootEl.innerHTML = out + line.slice(0, ci) + '<span class="cursor"></span>';
+      ci++;
+      setTimeout(typeBoot, line.startsWith('$') ? 28 : 14);
+    } else {
+      out += line + '\n';
+      li++; ci = 0;
+      setTimeout(typeBoot, 220);
+    }
+  }
+  typeBoot();
+}
+</script>
+
+</body>
+</html>
