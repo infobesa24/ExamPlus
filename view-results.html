@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+  <title>Student Records · Icon Launcher</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 30% 20%, #0f2e24, #071a14);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      padding: 20px;
+    }
+
+    /* ===== ROUND ICON · VIBRATING ===== */
+    .vibrating-icon {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #2a8f6e, #0f4a34);
+      box-shadow: 
+        0 12px 28px rgba(0, 0, 0, 0.6),
+        0 0 0 4px rgba(255, 255, 255, 0.08),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 4px 8px rgba(255, 255, 255, 0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      animation: vibrate 2.4s infinite ease-in-out, glowPulse 3.2s infinite alternate;
+      color: white;
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: 0.04em;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      line-height: 1.2;
+      padding: 16px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ===== VIBRATION ANIMATION ===== */
+    @keyframes vibrate {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      10% { transform: translate(-2px, -2px) rotate(-0.6deg); }
+      20% { transform: translate(2px, -1px) rotate(0.8deg); }
+      30% { transform: translate(-1px, 2px) rotate(-0.4deg); }
+      40% { transform: translate(1px, -2px) rotate(0.6deg); }
+      50% { transform: translate(-2px, 1px) rotate(-0.8deg); }
+      60% { transform: translate(2px, 2px) rotate(0.4deg); }
+      70% { transform: translate(-1px, -1px) rotate(-0.3deg); }
+      80% { transform: translate(1px, 1px) rotate(0.3deg); }
+      90% { transform: translate(-1px, 1px) rotate(-0.2deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    @keyframes glowPulse {
+      0% { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(255, 255, 255, 0.06), inset 0 -4px 8px rgba(0, 0, 0, 0.3), inset 0 4px 8px rgba(255, 255, 255, 0.12); }
+      100% { box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 6px rgba(255, 255, 255, 0.12), inset 0 -4px 8px rgba(0, 0, 0, 0.4), inset 0 4px 8px rgba(255, 255, 255, 0.18); }
+    }
+
+    .vibrating-icon:active {
+      transform: scale(0.92);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8), 0 0 0 4px rgba(255, 255, 255, 0.15);
+      animation: none;
+      transition: transform 0.06s;
+    }
+
+    @media (max-width: 480px) {
+      .vibrating-icon {
+        width: 150px;
+        height: 150px;
+        font-size: 1.25rem;
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .vibrating-icon {
+        width: 130px;
+        height: 130px;
+        font-size: 1rem;
+        padding: 10px;
+      }
+    }
+
+    /* ===== LOGIN OVERLAY (hidden by default) ===== */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 20px;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .login-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 48px;
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5);
+      animation: floatIn 0.4s ease;
+    }
+
+    @keyframes floatIn {
+      0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        border-radius: 36px;
+        padding: 32px 24px;
+      }
+    }
+
+    .login-card h2 {
+      margin-bottom: 8px;
+      font-weight: 800;
+      font-size: 1.6rem;
+      background: linear-gradient(125deg, #1e5a48, #2d8f6e);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .login-card .sub {
+      color: #5a8f7a;
+      font-size: 0.8rem;
+      margin-bottom: 24px;
+    }
+
+    .input-group {
+      margin: 14px 0;
+      width: 100%;
+    }
+
+    .login-card input {
+      width: 100%;
+      padding: 14px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 60px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      background: white;
+      transition: all 0.2s ease;
+    }
+
+    .login-card input:focus {
+      outline: none;
+      border-color: #0f9d58;
+      box-shadow: 0 0 0 4px rgba(15, 157, 88, 0.15);
+    }
+
+    .login-card input::placeholder {
+      color: #a8c0d0;
+      font-size: 0.85rem;
+    }
+
+    .login-card button {
+      width: 100%;
+      padding: 14px 20px;
+      margin-top: 18px;
+      background: linear-gradient(95deg, #0f9d58, #0c7e46);
+      color: white;
+      border: none;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .login-card button:active {
+      transform: scale(0.97);
+    }
+
+    .error-msg {
+      margin-top: 14px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      background: #fff0f0;
+      padding: 10px 16px;
+      border-radius: 60px;
+      color: #dc3545;
+      display: none;
+    }
+
+    .close-login {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      color: white;
+      font-size: 32px;
+      font-weight: 300;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      background: rgba(255,255,255,0.1);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .close-login:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .close-login:active {
+      transform: scale(0.92);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #ffffff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== MAIN VIEWER (hidden until login) ===== */
+    .viewer-container {
+      display: none;
+      max-width: 100%;
+      margin: 12px;
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 16px 20px;
+      border: 1px solid #eef2f8;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .viewer-container {
+        margin: 20px;
+        padding: 24px 28px;
+      }
+    }
+
+    .viewer-container h2 {
+      text-align: center;
+      color: #1e3c2c;
+      font-weight: 800;
+      font-size: 1.3rem;
+    }
+
+    .school-badge {
+      background: linear-gradient(135deg, #1e5a48, #2d8f6e);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .filter-bar {
+      background: #fafcfc;
+      padding: 14px 18px;
+      border-radius: 40px;
+      margin: 12px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #eef2f8;
+    }
+
+    .filter-bar label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #1e3c2c;
+      background: #eef5ea;
+      padding: 5px 14px;
+      border-radius: 40px;
+    }
+
+    select {
+      padding: 9px 16px;
+      border-radius: 40px;
+      border: 2px solid #e2e8f0;
+      font-size: 0.8rem;
+      background: white;
+      cursor: pointer;
+      min-width: 180px;
+      font-weight: 500;
+      flex: 1;
+    }
+
+    .reset-btn, .toggle-btn, .logout-btn {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.75rem;
+      touch-action: manipulation;
+      transition: all 0.2s ease;
+      color: #1e3c2c;
+    }
+
+    .reset-btn:hover, .toggle-btn:hover, .logout-btn:hover {
+      background: #eef2f8;
+    }
+    .reset-btn:active, .toggle-btn:active, .logout-btn:active {
+      transform: scale(0.96);
+    }
+
+    .logout-btn {
+      color: #dc3545;
+      border-color: #f0d4d4;
+    }
+    .logout-btn:hover {
+      background: #ffe5e5;
+      border-color: #dc3545;
+    }
+
+    .header-info {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+    .header-info h2 {
+      margin: 0;
+      flex: 1;
+      text-align: center;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      width: 100%;
+      margin-top: 15px;
+      border: 1px solid #eef2f8;
+      border-radius: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 750px;
+    }
+
+    th, td {
+      border: 1px solid #eef2f8;
+      padding: 10px 10px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #1e3c2c;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      font-size: 0.7rem;
+      z-index: 10;
+    }
+
+    .subject-header {
+      text-align: center;
+      background: #eef5ea;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #1e5a48;
+    }
+
+    .marks-subheader {
+      text-align: center;
+      background: #f0f6f0;
+      font-weight: 600;
+      font-size: 0.6rem;
+    }
+
+    .marks-cell {
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .image-preview {
+      max-width: 40px;
+      max-height: 44px;
+      cursor: pointer;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    .image-preview:hover { transform: scale(1.1); }
+    .image-preview:active { transform: scale(1.05); }
+
+    .image-modal {
+      display: none;
+      position: fixed;
+      z-index: 3000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.94);
+      cursor: pointer;
+    }
+
+    .image-modal-content {
+      margin: auto;
+      display: block;
+      max-width: 90%;
+      max-height: 85%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 25px;
+      color: white;
+      font-size: 36px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    .close-modal:hover { color: #ccc; }
+    .close-modal:active { color: #999; }
+
+    .no-data {
+      text-align: center;
+      padding: 40px 20px;
+      color: #5a6874;
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+
+    .record-count {
+      background: #eef5ea;
+      padding: 5px 14px;
+      border-radius: 40px;
+      display: inline-block;
+      margin-bottom: 10px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #1e5a48;
+    }
+
+    .status-msg {
+      background: #e8f1f8;
+      border-radius: 40px;
+      padding: 8px 16px;
+      margin-bottom: 15px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #1d6f94;
+      transition: all 0.3s ease;
+    }
+    .status-msg.error { background: #ffe0e0; color: #c0392b; }
+    .status-msg.success { background: #d4edda; color: #155724; }
+    .status-msg.warning { background: #fff3cd; color: #856404; }
+
+    @media (max-width: 640px) {
+      .header-info { flex-direction: column; text-align: center; }
+      .header-info h2 { order: -1; }
+      .filter-bar { flex-direction: column; align-items: stretch; }
+      select { width: 100%; }
+      .reset-btn, .toggle-btn, .logout-btn { text-align: center; }
+    }
+
+    @media print {
+      .login-overlay { display: none !important; }
+      .viewer-container { display: block !important; margin: 0; padding: 10px; box-shadow: none; border: 1px solid #ddd; border-radius: 0; }
+      .filter-bar { display: none; }
+      .logout-btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== VIBRATING ICON ===== -->
+  <div class="vibrating-icon" id="launcherIcon" role="button" aria-label="View student records">
+    VIEW<br />STUDENT
+  </div>
+
+  <!-- ===== LOGIN OVERLAY (hidden by default) ===== -->
+  <div class="login-overlay" id="loginOverlay">
+    <span class="close-login" id="closeLoginBtn">✕</span>
+    <div class="login-card">
+      <h2>📊 Student Records</h2>
+      <div class="sub">Sign in to access student information</div>
+      <div class="input-group">
+        <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email" inputmode="email">
+      </div>
+      <div class="input-group">
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+      </div>
+      <button id="loginBtn">➡️ ACCESS PORTAL ⬅️</button>
+      <div id="loginError" class="error-msg"></div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN VIEWER ===== -->
+  <div id="viewerSection" class="viewer-container">
+    <div class="header-info">
+      <button class="logout-btn" id="logoutBtn">🚪 Logout</button>
+      <h2>📋 STUDENT RECORDS</h2>
+      <div id="schoolBadge" class="school-badge">🏫 Loading...</div>
+    </div>
+
+    <div id="statusMsg" class="status-msg">✅ Ready — Select a class to view students</div>
+
+    <div class="filter-bar">
+      <label>📚 SELECT CLASS</label>
+      <select id="classSelect">
+        <option value="ALL">🏫 Loading classes...</option>
+      </select>
+      <button class="reset-btn" id="resetBtn">⟳ Show All</button>
+      <button class="toggle-btn" id="togglePhotoBtn">👁️ Show Student Photo</button>
+    </div>
+
+    <div class="table-wrapper">
+      <table id="dataTable">
+        <tr><td colspan="10" class="no-data">🔐 Please login to view records...</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== IMAGE MODAL ===== -->
+  <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+    <span class="close-modal">×</span>
+    <img class="image-modal-content" id="modalImage">
+  </div>
+
+  <script>
+    // ==================== CONFIGURATION ====================
+    const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyXMXDce2O7oOYAJM9oSuaEmjFo4OyfGAbm7LSCUBO2UhWJ8v1niXGxCp2Qw7vbozuJMw/exec';
+
+    // ==================== STATE ====================
+    let currentTabName = null;
+    let userEmail = null;
+    let allData = null;
+    let dataRows = [];
+    let headers = [];
+    let uniqueClasses = [];
+    let selectedClass = "ALL";
+    let showPhotoColumn = false;
+
+    const COL_CLASS_LIST = 0;
+    const COL_ROLL_NO = 1;
+    const COL_NAME = 2;
+    const COL_ACTUAL_CLASS = 3;
+    const COL_PHOTO = 4;
+    const COL_EXTRA_START = 5;
+    const COL_EXTRA_END = 9;
+    const COL_SUBJECT_START = 10;
+
+    let extraHeaders = [];
+    let subjectGroups = [];
+
+    // ==================== ICON LOGIC ====================
+    function showLoginOverlay() {
+      document.getElementById('loginOverlay').classList.add('active');
+      if (navigator.vibrate) navigator.vibrate(10);
+      setTimeout(() => document.getElementById('loginEmail').focus(), 300);
+    }
+
+    function hideLoginOverlay() {
+      document.getElementById('loginOverlay').classList.remove('active');
+      document.getElementById('loginError').style.display = 'none';
+    }
+
+    // ==================== API CALL ====================
+    function apiCallWithCallback(action, data, callback) {
+      const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+      let url = API_BASE_URL + '?action=' + encodeURIComponent(action);
+      for (let key in data) {
+        if (data.hasOwnProperty(key) && data[key] !== null && data[key] !== undefined) {
+          url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(data[key]));
+        }
+      }
+      url += '&callback=' + callbackName;
+
+      const script = document.createElement('script');
+      script.src = url;
+
+      window[callbackName] = function(response) {
+        delete window[callbackName];
+        script.remove();
+        callback(response);
+      };
+
+      script.onerror = function() {
+        delete window[callbackName];
+        script.remove();
+        callback({ error: 'Network error or invalid response' });
+      };
+
+      const timeoutId = setTimeout(() => {
+        if (window[callbackName]) {
+          delete window[callbackName];
+          script.remove();
+          callback({ error: 'Request timeout' });
+        }
+      }, 30000);
+
+      const originalCallback = window[callbackName];
+      window[callbackName] = function(response) {
+        clearTimeout(timeoutId);
+        originalCallback(response);
+      };
+
+      document.body.appendChild(script);
+    }
+
+    // ==================== UI FUNCTIONS ====================
+    function setStatus(message, type = "info") {
+      const statusDiv = document.getElementById("statusMsg");
+      if (statusDiv) {
+        statusDiv.innerHTML = message;
+        statusDiv.className = "status-msg " + type;
+      }
+    }
+
+    function showApp() {
+      document.getElementById('loginOverlay').classList.remove('active');
+      document.getElementById('viewerSection').style.display = 'block';
+      document.querySelector('.vibrating-icon').style.display = 'none';
+    }
+
+    function showIcon() {
+      document.getElementById('viewerSection').style.display = 'none';
+      document.querySelector('.vibrating-icon').style.display = 'flex';
+      hideLoginOverlay();
+    }
+
+    // ==================== LOGIN ====================
+    function handleLogin() {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+      const errorDiv = document.getElementById("loginError");
+
+      if (!email || !password) {
+        errorDiv.textContent = "Please enter both email and password.";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      const loginBtn = document.getElementById("loginBtn");
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = "Authenticating... <span class='spinner'></span>";
+      errorDiv.style.display = "none";
+
+      apiCallWithCallback('loginUser', {
+        email: email,
+        password: password
+      }, function(response) {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = "➡️ ACCESS PORTAL ⬅️";
+
+        if (response && response.success) {
+          currentTabName = response.tabName;
+          userEmail = response.email;
+          document.getElementById("schoolBadge").innerHTML = `🏫 Welcome: ${currentTabName.toUpperCase()}`;
+          showApp();
+          loadDataFromTab();
+          setStatus('✅ Login successful! Loading data...', 'success');
+        } else {
+          errorDiv.textContent = response?.error || "Login failed. Please verify credentials.";
+          errorDiv.style.display = "block";
+        }
+      });
+    }
+
+    function doLogout() {
+      currentTabName = null;
+      allData = null;
+      selectedClass = "ALL";
+      showPhotoColumn = false;
+
+      document.getElementById("viewerSection").style.display = 'none';
+      document.querySelector('.vibrating-icon').style.display = 'flex';
+      document.getElementById("loginEmail").value = "";
+      document.getElementById("loginPassword").value = "";
+      document.getElementById("loginError").style.display = "none";
+      const toggleBtn = document.getElementById("togglePhotoBtn");
+      if (toggleBtn) toggleBtn.innerHTML = "👁️ Show Student Photo";
+
+      const classSelect = document.getElementById("classSelect");
+      if (classSelect) classSelect.innerHTML = '<option value="ALL">🏫 Login to load classes</option>';
+      document.getElementById("dataTable").innerHTML = '<tr><td colspan="10" class="no-data">🔐 Please login to view records...</td></tr>';
+      setStatus('👋 Logged out', 'info');
+    }
+
+    // ==================== DATA LOADING ====================
+    function loadDataFromTab() {
+      if (!currentTabName) {
+        setStatus("Access restricted. Please contact administrator.", "error");
+        return;
+      }
+
+      setStatus(`🔄 Loading data from "${currentTabName}"...`, "info");
+      document.getElementById("dataTable").innerHTML = '<tr><td colspan="10" class="no-data">📂 Loading data... <span class="spinner"></span></td></tr>';
+
+      apiCallWithCallback('getDataFromTab', {
+        tabName: currentTabName
+      }, function(response) {
+        if (response && response.error) {
+          document.getElementById("dataTable").innerHTML = '<tr><td colspan="10" class="no-data" style="color:#dc3545;">❌ ' + escapeHtml(response.error) + '</td></tr>';
+          setStatus("❌ Error loading data", "error");
+          return;
+        }
+
+        if (!response || !Array.isArray(response) || response.length < 2) {
+          document.getElementById("dataTable").innerHTML = '<tr><td colspan="10" class="no-data">📭 No student records found</td></tr>';
+          setStatus(`📭 No records found`, "error");
+          return;
+        }
+
+        allData = response;
+        headers = response[0] || [];
+        dataRows = response.slice(1) || [];
+
+        parseExtraHeaders();
+        parseSubjectGroups();
+        extractUniqueClasses();
+        populateClassDropdown();
+        renderTable();
+        setStatus(`✅ Loaded ${dataRows.length} student records from "${currentTabName}"`, "success");
+      });
+    }
+
+    function parseExtraHeaders() {
+      extraHeaders = [];
+      for (let col = COL_EXTRA_START; col <= COL_EXTRA_END; col++) {
+        if (col < headers.length && headers[col] && headers[col].toString().trim() !== "") {
+          extraHeaders.push({ index: col, name: headers[col].toString().trim() });
+        }
+      }
+    }
+
+    function parseSubjectGroups() {
+      subjectGroups = [];
+      let col = COL_SUBJECT_START;
+      while (col < headers.length) {
+        const subjectName = headers[col];
+        if (subjectName && subjectName.toString().trim() !== "") {
+          if (col + 2 < headers.length) {
+            subjectGroups.push({
+              name: subjectName.toString().trim(),
+              startCol: col,
+              test1Col: col,
+              test2Col: col + 1,
+              examCol: col + 2
+            });
+            col += 3;
+          } else { col++; }
+        } else { col++; }
+      }
+    }
+
+    function extractUniqueClasses() {
+      var classSet = new Set();
+      for (var i = 0; i < dataRows.length; i++) {
+        var classValue = dataRows[i][COL_ACTUAL_CLASS];
+        if (classValue && classValue.toString().trim() !== "") {
+          classSet.add(classValue.toString().trim());
+        }
+      }
+      uniqueClasses = Array.from(classSet).sort((a, b) => a.localeCompare(b));
+    }
+
+    function populateClassDropdown() {
+      var select = document.getElementById("classSelect");
+      if (!uniqueClasses.length) {
+        select.innerHTML = '<option value="ALL">⚠️ No class data available</option>';
+        return;
+      }
+      var totalCount = dataRows.length;
+      var options = '<option value="ALL">🏫 All Classes (' + totalCount + ')</option>';
+      for (var i = 0; i < uniqueClasses.length; i++) {
+        var cls = uniqueClasses[i];
+        var count = 0;
+        for (var j = 0; j < dataRows.length; j++) {
+          if ((dataRows[j][COL_ACTUAL_CLASS] || "").toString().trim() === cls) count++;
+        }
+        options += '<option value="' + escapeHtml(cls) + '">' + escapeHtml(cls) + ' (' + count + ')</option>';
+      }
+      select.innerHTML = options;
+      select.value = "ALL";
+    }
+
+    // ==================== FILTERING & RENDERING ====================
+    function filterByClass() {
+      selectedClass = document.getElementById("classSelect").value;
+      renderTable();
+    }
+
+    function resetFilter() {
+      document.getElementById("classSelect").value = "ALL";
+      selectedClass = "ALL";
+      renderTable();
+    }
+
+    function togglePhotoColumn() {
+      showPhotoColumn = !showPhotoColumn;
+      document.getElementById("togglePhotoBtn").innerHTML = showPhotoColumn ? "🙈 Hide Student Photo" : "👁️ Show Student Photo";
+      renderTable();
+    }
+
+    function getFilteredRows() {
+      if (selectedClass === "ALL") return dataRows;
+      return dataRows.filter(row => {
+        const rowClass = (row[COL_ACTUAL_CLASS] || "").toString().trim();
+        return rowClass === selectedClass;
+      });
+    }
+
+    function isImageUrl(value) {
+      if (!value || typeof value !== 'string') return false;
+      var lower = value.toLowerCase();
+      return lower.startsWith('data:image') ||
+        lower.indexOf('.jpg') > -1 || lower.indexOf('.png') > -1 ||
+        lower.indexOf('.jpeg') > -1 || lower.indexOf('.gif') > -1 ||
+        lower.indexOf('.webp') > -1;
+    }
+
+    function createImageThumbnail(imageUrl) {
+      if (!imageUrl || imageUrl === "") return "—";
+      var safeUrl = imageUrl.replace(/'/g, "\\'");
+      return '<img src="' + escapeHtmlAttr(imageUrl) + '" class="image-preview" onclick="event.stopPropagation(); showFullImage(\'' + safeUrl + '\')" onerror="this.outerHTML=\'<span>📷 No image</span>\'">';
+    }
+
+    function escapeHtmlAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
+    }
+
+    function showFullImage(imageUrl) {
+      var modal = document.getElementById("imageModal");
+      var modalImg = document.getElementById("modalImage");
+      modal.style.display = "block";
+      modalImg.src = imageUrl;
+    }
+
+    function closeImageModal() {
+      document.getElementById("imageModal").style.display = "none";
+    }
+
+    function renderTable() {
+      const filteredRows = getFilteredRows();
+      const totalCount = filteredRows.length;
+      updateRecordCount(totalCount, selectedClass === "ALL" ? "All Classes" : selectedClass);
+
+      if (filteredRows.length === 0) {
+        document.getElementById("dataTable").innerHTML = '<tr><td colspan="10" class="no-data">📭 No students found in this class</td></tr>';
+        return;
+      }
+
+      let html = '<thead>';
+      html += '<tr>';
+      html += '<th rowspan="2">Roll No</th>';
+      html += '<th rowspan="2">Full Name</th>';
+      html += '<th rowspan="2">Class</th>';
+      if (showPhotoColumn) html += '<th rowspan="2">Student Photo</th>';
+      for (let extra of extraHeaders) {
+        html += `<th rowspan="2">${escapeHtml(extra.name)}</th>`;
+      }
+      for (let group of subjectGroups) {
+        html += `<th colspan="3" class="subject-header">${escapeHtml(group.name)}</th>`;
+      }
+      html += '</tr>';
+      html += '<tr>';
+      for (let i = 0; i < subjectGroups.length; i++) {
+        html += '<th class="marks-subheader">Test 1<br><span style="font-weight:normal; font-size:8px;">(max 15)</span></th>';
+        html += '<th class="marks-subheader">Test 2<br><span style="font-weight:normal; font-size:8px;">(max 15)</span></th>';
+        html += '<th class="marks-subheader">Exam<br><span style="font-weight:normal; font-size:8px;">(max 70)</span></th>';
+      }
+      html += '</tr>';
+      html += '</thead><tbody>';
+
+      for (let row of filteredRows) {
+        html += '<tr>';
+        html += `<td>${escapeHtml(row[COL_ROLL_NO] || '—')}</td>`;
+        html += `<td>${escapeHtml(row[COL_NAME] || '—')}</td>`;
+        html += `<td>${escapeHtml(row[COL_ACTUAL_CLASS] || '—')}</td>`;
+        if (showPhotoColumn) {
+          const photoUrl = row[COL_PHOTO];
+          if (photoUrl && isImageUrl(photoUrl)) {
+            html += `<td>${createImageThumbnail(photoUrl)}</td>`;
+          } else {
+            html += `<td>—</td>`;
+          }
+        }
+        for (let extra of extraHeaders) {
+          const value = row[extra.index] !== undefined && row[extra.index] !== "" ? row[extra.index] : "—";
+          html += `<td>${escapeHtml(value)}</td>`;
+        }
+        for (let group of subjectGroups) {
+          const test1 = row[group.test1Col] !== undefined && row[group.test1Col] !== "" && row[group.test1Col] !== 0 ? row[group.test1Col] : "—";
+          const test2 = row[group.test2Col] !== undefined && row[group.test2Col] !== "" && row[group.test2Col] !== 0 ? row[group.test2Col] : "—";
+          const exam = row[group.examCol] !== undefined && row[group.examCol] !== "" && row[group.examCol] !== 0 ? row[group.examCol] : "—";
+          html += `<td class="marks-cell">${escapeHtml(test1)}</td>`;
+          html += `<td class="marks-cell">${escapeHtml(test2)}</td>`;
+          html += `<td class="marks-cell">${escapeHtml(exam)}</td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</tbody>';
+      document.getElementById("dataTable").innerHTML = html;
+    }
+
+    function updateRecordCount(count, label) {
+      var existingCount = document.querySelector(".record-count");
+      if (existingCount) existingCount.remove();
+      var headerDiv = document.querySelector(".header-info");
+      var countHtml = '<div class="record-count">📊 ' + escapeHtml(label) + ' • ' + count + ' student(s)</div>';
+      headerDiv.insertAdjacentHTML('beforeend', countHtml);
+    }
+
+    function escapeHtml(text) {
+      if (text === undefined || text === null) return '';
+      if (typeof text !== 'string') text = String(text);
+      return text.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"').replace(/'/g, ''');
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    document.getElementById("launcherIcon").addEventListener("click", showLoginOverlay);
+    document.getElementById("closeLoginBtn").addEventListener("click", hideLoginOverlay);
+    document.getElementById("loginBtn").addEventListener("click", handleLogin);
+    document.getElementById("logoutBtn").addEventListener("click", doLogout);
+    document.getElementById("classSelect").addEventListener("change", filterByClass);
+    document.getElementById("resetBtn").addEventListener("click", resetFilter);
+    document.getElementById("togglePhotoBtn").addEventListener("click", togglePhotoColumn);
+
+    document.getElementById("loginPassword").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") handleLogin();
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeImageModal();
+        hideLoginOverlay();
+      }
+    });
+
+    // Close login overlay when clicking outside the card
+    document.getElementById("loginOverlay").addEventListener("click", function(e) {
+      if (e.target === this) hideLoginOverlay();
+    });
+
+    window.addEventListener('load', function() {
+      document.querySelector('.vibrating-icon').style.display = 'flex';
+      document.getElementById('viewerSection').style.display = 'none';
+      document.getElementById('loginOverlay').classList.remove('active');
+    });
+  </script>
+
+</body>
+</html>
