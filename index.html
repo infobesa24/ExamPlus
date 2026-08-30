@@ -1,6 +1,739 @@
-<button id="backButton" class="back-button" onclick="goHome()"> ← Back </button> <div id="headerTitle" class="header-title"> ￼ ExamPlus </div> 
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>ExamPlus</title>  <style>
 
-<div class="welcome"> <div class="welcome-icon"> ￼ </div> <h1> ExamPlus </h1> <p> School Management System </p> </div> <!-- =================================== SUPER ADMIN =================================== --> <div class="role-section"> <div class="role-title"> ￼ Super Admin </div> <div class="icon-grid"> <button class="app-card" onclick="openPage('create-school.html', 'Create School')"> <div class="app-icon purple"> ￼ </div> <div class="app-name"> Create School </div> </button> <button class="app-card" onclick="openPage('view-schools.html', 'View Schools')"> <div class="app-icon blue"> ￼ </div> <div class="app-name"> View Schools </div> </button> </div> </div> <!-- =================================== ADMIN =================================== --> <div class="role-section"> <div class="role-title"> ￼ Admin </div> <div class="icon-grid"> <button class="app-card" onclick="openPage('school.html', 'School Details')"> <div class="app-icon blue"> ￼ </div> <div class="app-name"> School Details </div> </button> <button class="app-card" onclick="openPage('students.html', 'Students Details')"> <div class="app-icon green"> ￼ </div> <div class="app-name"> Students Details </div> </button> <button class="app-card" onclick="openPage('students-bulk.html', 'Students in Bulk')"> <div class="app-icon cyan"> ￼ </div> <div class="app-name"> Students in Bulk </div> </button> <button class="app-card" onclick="openPage('subjects.html', 'All Subjects')"> <div class="app-icon purple"> ￼ </div> <div class="app-name"> All Subjects </div> </button> <button class="app-card" onclick="openPage('settings.html', 'Settings')"> <div class="app-icon orange"> ￼ </div> <div class="app-name"> Settings </div> </button> <button class="app-card" onclick="openPage('report.html', 'Report Card')"> <div class="app-icon pink"> ￼ </div> <div class="app-name"> Report Card </div> </button> </div> </div> <!-- =================================== BURSAR =================================== --> <div class="role-section"> <div class="role-title"> ￼ Bursar </div> <div class="icon-grid"> <button class="app-card" onclick="openPage('generate-receipt.html', 'Generate Receipt')"> <div class="app-icon green"> ￼ </div> <div class="app-name"> Generate Receipt </div> </button> <button class="app-card" onclick="openPage('receipt-history.html', 'Receipt History')"> <div class="app-icon yellow"> ￼ </div> <div class="app-name"> Receipt History </div> </button> </div> </div> <!-- =================================== TEACHER =================================== --> <div class="role-section"> <div class="role-title"> ￼ Teacher </div> <div class="icon-grid"> <button class="app-card" onclick="openPage('upload-result.html', 'Upload Result')"> <div class="app-icon blue"> ￼ </div> <div class="app-name"> Upload Result </div> </button> <button class="app-card" onclick="openPage('view-results.html', 'View Results')"> <div class="app-icon green"> ￼ </div> <div class="app-name"> View Results </div> </button> <button class="app-card" onclick="openPage('assessment.html', 'Assessment')"> <div class="app-icon orange"> ￼ </div> <div class="app-name"> Assessment </div> </button> </div> </div> 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-<iframe id="pageFrame" src="" title="ExamPlus Section"> </iframe>
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+    }
 
+    body {
+      overflow-x: hidden;
+    }
+
+    /* =====================================
+       APP HEADER
+       ===================================== */
+
+    .header {
+      width: 100%;
+      height: 65px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+
+    .header-title {
+      flex: 1;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .back-button {
+      display: none;
+      border: none;
+      background: rgba(255,255,255,0.18);
+      color: white;
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* =====================================
+       HOME PAGE
+       ===================================== */
+
+    #homePage {
+      width: 100%;
+      min-height: calc(100vh - 65px);
+      padding: 25px 15px 40px;
+    }
+
+    .welcome {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .welcome-icon {
+      font-size: 55px;
+      margin-bottom: 8px;
+    }
+
+    .welcome h1 {
+      color: #333;
+      font-size: 27px;
+      margin-bottom: 7px;
+    }
+
+    .welcome p {
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* =====================================
+       ROLE SECTIONS
+       ===================================== */
+
+    .role-section {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto 25px;
+    }
+
+    .role-title {
+      font-size: 18px;
+      color: #333;
+      font-weight: bold;
+      margin-bottom: 12px;
+      padding-left: 3px;
+    }
+
+    /* =====================================
+       ICON GRID
+       ===================================== */
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .app-card {
+      border: none;
+      background: white;
+      border-radius: 17px;
+      min-height: 125px;
+      padding: 18px 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: transform 0.15s, box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .app-card:active {
+      transform: scale(0.96);
+    }
+
+    .app-card:hover {
+      box-shadow: 0 7px 20px rgba(0,0,0,0.13);
+    }
+
+    .app-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      margin-bottom: 10px;
+      background: #eef0ff;
+    }
+
+    .app-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      line-height: 1.3;
+    }
+
+    /* =====================================
+       COLORS FOR ICON BOXES
+       ===================================== */
+
+    .purple {
+      background: #eeeaff;
+    }
+
+    .blue {
+      background: #e8f2ff;
+    }
+
+    .green {
+      background: #e7f8ef;
+    }
+
+    .orange {
+      background: #fff2df;
+    }
+
+    .pink {
+      background: #ffeaf3;
+    }
+
+    .yellow {
+      background: #fff8d9;
+    }
+
+    .red {
+      background: #ffe8e8;
+    }
+
+    .cyan {
+      background: #e5f9fb;
+    }
+
+    /* =====================================
+       PAGE VIEWER
+       ===================================== */
+
+    #viewerPage {
+      display: none;
+      width: 100%;
+      height: calc(100vh - 65px);
+      background: white;
+      position: fixed;
+      left: 0;
+      top: 65px;
+      z-index: 50;
+    }
+
+    #pageFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: white;
+    }
+
+    /* =====================================
+       DESKTOP
+       ===================================== */
+
+    @media (min-width: 700px) {
+
+      #homePage {
+        padding-left: 25px;
+        padding-right: 25px;
+      }
+
+      .icon-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+      }
+
+      .app-card {
+        min-height: 145px;
+      }
+
+      .app-icon {
+        width: 65px;
+        height: 65px;
+        font-size: 34px;
+      }
+
+      .app-name {
+        font-size: 15px;
+      }
+    }
+
+    @media (min-width: 1000px) {
+
+      .icon-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+    }
+
+    /* =====================================
+       SMALL PHONE
+       ===================================== */
+
+    @media (max-width: 360px) {
+
+      #homePage {
+        padding: 18px 10px 30px;
+      }
+
+      .welcome h1 {
+        font-size: 23px;
+      }
+
+      .app-card {
+        min-height: 115px;
+      }
+
+      .app-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 27px;
+      }
+
+      .app-name {
+        font-size: 12px;
+      }
+
+    }
+
+  </style></head><body>  <!-- =====================================
+       HEADER
+       ===================================== -->  <div class="header"><button
+  id="backButton"
+  class="back-button"
+  onclick="goHome()">
+  ← Back
+</button>
+
+<div
+  id="headerTitle"
+  class="header-title">
+  📚 ExamPlus
+</div>
+
+  </div>  <!-- =====================================
+       HOME PAGE
+       ===================================== -->  <div id="homePage"><div class="welcome">
+
+  <div class="welcome-icon">
+    📚
+  </div>
+
+  <h1>
+    ExamPlus
+  </h1>
+
+  <p>
+    School Management System
+  </p>
+
+</div>
+
+
+<!-- ===================================
+     SUPER ADMIN
+     =================================== -->
+
+<div class="role-section">
+
+  <div class="role-title">
+    👑 Super Admin
+  </div>
+
+  <div class="icon-grid">
+
+    <button
+      class="app-card"
+      onclick="openPage('create-school.html', 'Create School')">
+
+      <div class="app-icon purple">
+        🏫
+      </div>
+
+      <div class="app-name">
+        Create School
+      </div>
+
+    </button>
+
+
+    <button
+      class="app-card"
+      onclick="openPage('view-schools.html', 'View Schools')">
+
+      <div class="app-icon blue">
+        🏫
+      </div>
+
+      <div class="app-name">
+        View Schools
+      </div>
+
+    </button>
+
+  </div>
+
+</div>
+
+
+
+<!-- ===================================
+     ADMIN
+     =================================== -->
+
+<div class="role-section">
+
+  <div class="role-title">
+    👨‍💼 Admin
+  </div>
+
+  <div class="icon-grid">
+
+    <button
+      class="app-card"
+      onclick="openPage('school.html', 'School Details')">
+
+      <div class="app-icon blue">
+        🏫
+      </div>
+
+      <div class="app-name">
+        School Details
+      </div>
+
+    </button>
+
+
+    <button
+      class="app-card"
+      onclick="openPage('students.html', 'Students Details')">
+
+      <div class="app-icon green">
+        👨‍🎓
+      </div>
+
+      <div class="app-name">
+        Students Details
+      </div>
+
+    </button>
+
+
+    <button
+      class="app-card"
+      onclick="openPage('students-bulk.html', 'Students in Bulk')">
+
+      <div class="app-icon cyan">
+        👥
+      </div>
+
+      <div class="app-name">
+        Students in Bulk
+      </div>
+
+    </button>
+
+
+    <button
+      class="app-card"
+      onclick="openPage('subjects.html', 'All Subjects')">
+
+      <div class="app-icon purple">
+        📚
+      </div>
+
+      <div class="app-name">
+        All Subjects
+      </div>
+
+    </button>
+
+
+    <button
+      class="app-card"
+      onclick="openPage('settings.html', 'Settings')">
+
+      <div class="app-icon orange">
+        ⚙️
+      </div>
+
+      <div class="app-name">
+        Settings
+      </div>
+
+    </button>
+
+
+    <button
+      class="app-card"
+      onclick="openPage('report.html', 'Report Card')">
+
+      <div class="app-icon pink">
+        📋
+      </div>
+
+      <div class="app-name">
+        Report Card
+      </div>
+
+    </button>
+
+  </div>
+
+</div>
+
+
+
+<!-- ===================================
+     BURSAR
+     =================================== -->
+
+<div class="role-section">
+
+  <div class="role-title">
+    💰 Bursar
+  </div>
+
+  <div class="icon-grid">
+
+    <button
+      class="app-card"
+      onclick="openPage('generate-receipt.html', 'Generate Receipt')">
+
+      <div class="app-icon green">
+        🧾
+      </div>
+
+      <div class="app-name">
+        Generate Receipt
+      </div>
+
+    </button>
+
+
+    <button
+      class="app-card"
+      onclick="openPage('receipt-history.html', 'Receipt History')">
+
+      <div class="app-icon yellow">
+        📜
+      </div>
+
+      <div class="app-name">
+        Receipt History
+      </div>
+
+    </button>
+
+  </div>
+
+</div>
+
+
+
+<!-- ===================================
+     TEACHER
+     =================================== -->
+
+<div class="role-section">
+
+  <div class="role-title">
+    👨‍🏫 Teacher
+  </div>
+
+  <div class="icon-grid">
+
+    <button
+      class="app-card"
+      onclick="openPage('upload-result.html', 'Upload Result')">
+
+      <div class="app-icon blue">
+        📤
+      </div>
+
+      <div class="app-name">
+        Upload Result
+      </div>
+
+    </button>
+
+
+    <button
+      class="app-card"
+      onclick="openPage('view-results.html', 'View Results')">
+
+      <div class="app-icon green">
+        📊
+      </div>
+
+      <div class="app-name">
+        View Results
+      </div>
+
+    </button>
+
+
+    <button
+      class="app-card"
+      onclick="openPage('assessment.html', 'Assessment')">
+
+      <div class="app-icon orange">
+        📝
+      </div>
+
+      <div class="app-name">
+        Assessment
+      </div>
+
+    </button>
+
+  </div>
+
+</div>
+
+  </div>  <!-- =====================================
+       PAGE VIEWER
+       ===================================== -->  <div id="viewerPage"><iframe
+  id="pageFrame"
+  src=""
+  title="ExamPlus Section">
+</iframe>
+
+  </div>  <!-- =====================================
+       JAVASCRIPT
+       ===================================== -->  <script>
+
+    /*
+     * ======================================
+     * OPEN HTML FILE INSIDE INDEX.HTML
+     * ======================================
+     */
+
+    function openPage(fileName, title) {
+
+      const home =
+        document.getElementById("homePage");
+
+      const viewer =
+        document.getElementById("viewerPage");
+
+      const frame =
+        document.getElementById("pageFrame");
+
+      const back =
+        document.getElementById("backButton");
+
+      const header =
+        document.getElementById("headerTitle");
+
+
+      /*
+       * Hide home
+       */
+
+      home.style.display = "none";
+
+
+      /*
+       * Show viewer
+       */
+
+      viewer.style.display = "block";
+
+
+      /*
+       * Load the selected HTML file
+       */
+
+      frame.src = fileName;
+
+
+      /*
+       * Change header title
+       */
+
+      header.textContent =
+        "📚 " + title;
+
+
+      /*
+       * Show Back button
+       */
+
+      back.style.display = "block";
+
+
+      /*
+       * Put page at top
+
+       */
+
+      window.scrollTo(0, 0);
+
+    }
+
+
+
+    /*
+     * ======================================
+     * RETURN TO HOME
+     * ======================================
+     */
+
+    function goHome() {
+
+      const home =
+        document.getElementById("homePage");
+
+      const viewer =
+        document.getElementById("viewerPage");
+
+      const frame =
+        document.getElementById("pageFrame");
+
+      const back =
+        document.getElementById("backButton");
+
+      const header =
+        document.getElementById("headerTitle");
+
+
+      /*
+       * Clear current page
+       */
+
+      frame.src = "";
+
+
+      /*
+       * Hide viewer
+       */
+
+      viewer.style.display = "none";
+
+
+      /*
+       * Show home
+
+       */
+
+      home.style.display = "block";
+
+
+      /*
+       * Restore header
+
+       */
+
+      header.textContent =
+        "📚 ExamPlus";
+
+
+      /*
+       * Hide back button
+       */
+
+      back.style.display = "none";
+
+
+      /*
+       * Scroll home to top
+       */
+
+      window.scrollTo(0, 0);
+
+    }
+
+  </script></body>
+</html>
