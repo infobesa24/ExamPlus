@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Payment History Report - Bursar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a5dab;
+            --primary-dark: #124a8a;
+            --primary-light: #e8f0fe;
+            --secondary: #0f7b3a;
+            --secondary-dark: #0a622e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --radius: 16px;
+            --radius-sm: 8px;
+            --radius-lg: 24px;
+            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #eef2f7 0%, #f8fafc 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 16px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 540px;
+            margin: 0 auto;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            padding: 28px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .header-logo {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 19px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(26, 93, 171, 0.3);
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gray-900);
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: var(--gray-500);
+            font-weight: 500;
+            margin-top: 1px;
+        }
+
+        .hidden { display: none !important; }
+
+        .login-icon {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+        
+        .form-group { margin-bottom: 18px; }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        .form-group label i { margin-right: 6px; color: var(--primary); }
+
+        .input-wrapper { position: relative; }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            font-size: 16px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 13px 16px 13px 44px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-family: inherit;
+            transition: var(--transition);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        .form-group select {
+            padding-left: 44px;
+            cursor: pointer;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(26, 93, 171, 0.1);
+        }
+
+        .form-group input::placeholder { color: var(--gray-400); }
+
+        .btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            touch-action: manipulation;
+        }
+
+        .btn:active { transform: scale(0.97); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 14px rgba(26, 93, 171, 0.35);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            color: white;
+            box-shadow: 0 4px 14px rgba(15, 123, 58, 0.35);
+        }
+
+        .btn-success:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #dc3545, #b02a37);
+            color: white;
+            box-shadow: 0 4px 14px rgba(220, 53, 69, 0.35);
+        }
+
+        .btn-download:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gray-200);
+            color: var(--gray-700);
+            margin-top: 10px;
+        }
+
+        .btn-outline:hover { background: var(--gray-50); }
+
+        .btn-outline-small {
+            background: transparent;
+            border: 1.5px solid var(--gray-300);
+            color: var(--gray-600);
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-outline-small:hover {
+            background: var(--gray-50);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 12px;
+            text-align: center;
+            background: #fef2f2;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid #fecaca;
+        }
+
+        .status-message {
+            font-size: 13px;
+            margin-top: 14px;
+            text-align: center;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+        }
+
+        .status-message.info {
+            color: var(--primary);
+            background: var(--primary-light);
+            border: 1px solid rgba(26, 93, 171, 0.15);
+        }
+
+        .status-message.success {
+            color: var(--secondary-dark);
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status-message.error {
+            color: var(--danger);
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .admin-panel {
+            background: var(--gray-50);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin-bottom: 18px;
+            border: 2px solid var(--gray-200);
+        }
+
+        .admin-panel .school-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            word-break: break-word;
+        }
+
+        .admin-panel .school-name i { color: var(--primary); flex-shrink: 0; }
+
+        .admin-panel .meta {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 12px;
+        }
+
+        .bursar-badge {
+            display: inline-block;
+            background: #0f7b3a;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group .form-group {
+            flex: 1;
+            min-width: 140px;
+            margin-bottom: 0;
+        }
+
+        .filter-group .form-group label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+            margin-bottom: 4px;
+        }
+
+        .filter-group .form-group select {
+            padding: 10px 36px 10px 36px;
+            font-size: 14px;
+        }
+
+        .filter-group .form-group .input-wrapper i {
+            font-size: 13px;
+            left: 12px;
+        }
+
+        .filter-group .btn-filter {
+            padding: 10px 16px;
+            width: auto;
+            flex-shrink: 0;
+            font-size: 13px;
+            border-radius: var(--radius-sm);
+        }
+
+        .filter-group .btn-filter i { margin-right: 4px; }
+
+        .info-note {
+            font-size: 12px;
+            color: var(--gray-500);
+            text-align: center;
+            margin-top: 14px;
+            line-height: 1.5;
+        }
+
+        .info-note i { color: var(--gray-400); margin-right: 4px; }
+
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .table-wrap {
+            margin-top: 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            max-height: 340px;
+            overflow-y: auto;
+        }
+
+        .table-wrap table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px;
+            font-size: 10px;
+        }
+
+        .table-wrap th,
+        .table-wrap td {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--gray-200);
+            border-right: 1px solid var(--gray-200);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .table-wrap thead th {
+            position: sticky;
+            top: 0;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        .table-wrap tr.totals-row td {
+            background: var(--primary-light);
+            font-weight: 700;
+            color: var(--primary-dark);
+            position: sticky;
+            top: 26px;
+            z-index: 1;
+        }
+        
+        .table-wrap tr.class-totals-row td {
+            background: #fff3cd;
+            font-weight: 700;
+            color: #856404;
+            border-top: 2px solid #ffc107;
+            border-bottom: 2px solid #ffc107;
+        }
+
+        .table-wrap tr:last-child td { border-bottom: none; }
+        .table-wrap td:last-child, .table-wrap th:last-child { border-right: none; }
+
+        .table-scroll-hint {
+            font-size: 11px;
+            color: var(--gray-400);
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .summary-stat {
+            background: white;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-200);
+            text-align: center;
+        }
+
+        .summary-stat .number {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .summary-stat .label {
+            font-size: 9px;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 32px 28px;
+            border-radius: var(--radius-lg);
+            max-width: 400px;
+            width: 100%;
+            box-shadow: var(--shadow-xl);
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .modal-box .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .modal-box .modal-header h3 {
+            font-size: 18px;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-box .modal-header h3 i {
+            color: var(--primary);
+        }
+
+        .modal-box .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--gray-400);
+            transition: var(--transition);
+        }
+
+        .modal-box .modal-close:hover {
+            color: var(--gray-600);
+        }
+
+        .modal-box .form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-box .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-700);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .modal-box .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            transition: var(--transition);
+            background: var(--gray-50);
+        }
+
+        .modal-box .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(26, 93, 171, 0.1);
+        }
+
+        .modal-box .btn {
+            margin-top: 8px;
+        }
+
+        .modal-box .btn-success {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+        }
+
+        .modal-box .btn-success:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .password-hint {
+            font-size: 11px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        .password-hint i {
+            color: var(--warning);
+            margin-right: 4px;
+        }
+
+        .download-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            padding: 16px;
+        }
+
+        .download-overlay.active {
+            display: flex;
+        }
+
+        .download-overlay .loader-box {
+            background: white;
+            padding: 40px 32px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            max-width: 320px;
+            width: 90%;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .download-overlay .loader-box .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .download-overlay .loader-box h3 {
+            font-size: 16px;
+            color: var(--gray-800);
+            margin-bottom: 4px;
+        }
+
+        .download-overlay .loader-box p {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        .download-overlay .loader-box .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--gray-200);
+            border-radius: 2px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .download-overlay .loader-box .progress-bar .fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .card { padding: 20px 16px; border-radius: 20px; }
+            .header { gap: 10px; margin-bottom: 20px; padding-bottom: 12px; }
+            .header-logo { width: 36px; height: 36px; font-size: 16px; }
+            .header h1 { font-size: 16px; }
+            .header p { font-size: 11px; }
+            .admin-panel { padding: 14px; }
+            .admin-panel .school-name { font-size: 15px; }
+            .btn { font-size: 14px; padding: 13px 16px; }
+            .summary-stats { grid-template-columns: repeat(2, 1fr); }
+            .modal-box { padding: 24px 18px; }
+        }
+
+        @media (max-width: 400px) {
+            .card { padding: 18px 14px; }
+            .header h1 { font-size: 15px; }
+            .filter-group { flex-direction: column; align-items: stretch; }
+            .filter-group .form-group { min-width: 0; }
+            .filter-group .btn-filter { width: 100%; }
+            .table-wrap { max-height: 260px; }
+            .summary-stats { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 360px) {
+            .card { padding: 14px 10px; }
+            body { padding: 6px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="download-overlay" id="downloadOverlay">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <h3>Generating Payment Report</h3>
+            <p>Please wait while we prepare your payment history report...</p>
+            <div class="progress-bar">
+                <div class="fill" id="progressFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Change Password</h3>
+                <button class="modal-close" id="closeModalBtn">×</button>
+            </div>
+            <div id="modalStatus" style="margin-bottom:12px;"></div>
+            <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" id="currentPassword" placeholder="Enter current password">
+            </div>
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+                <div class="password-hint"><i class="fas fa-info-circle"></i> Minimum 6 characters</div>
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+            <button class="btn btn-success" id="changePasswordBtn">
+                <i class="fas fa-save"></i> Update Password
+            </button>
+        </div>
+    </div>
+
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <div class="header-logo"><i class="fas fa-file-invoice"></i></div>
+            <div>
+                <h1>Payment History Report</h1>
+                <p>View and download all payment transactions</p>
+            </div>
+        </div>
+
+        <!-- ===== LOGIN SECTION ===== -->
+        <div id="loginSection">
+            <div class="login-icon">🔐</div>
+            <div style="text-align:center;margin-bottom:20px;">
+                <h2 style="font-size:20px;color:var(--gray-800);">Bursar Login</h2>
+                <p style="font-size:13px;color:var(--gray-500);">Access payment history reports</p>
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email Address</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" inputmode="email" autocomplete="email">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
+            <div id="loginError" class="error-message hidden"></div>
+        </div>
+
+        <!-- ===== REPORT SECTION ===== -->
+        <div id="reportSection" class="hidden">
+            <div class="admin-panel">
+                <div class="school-name">
+                    <i class="fas fa-school"></i> 
+                    <span id="schoolNameDisplay">—</span>
+                    <span class="bursar-badge"><i class="fas fa-user"></i> Bursar</span>
+                </div>
+                <div class="meta">
+                    <span><i class="fas fa-calendar-alt"></i> <span id="termDisplay">—</span></span>
+                    <span><i class="fas fa-file-alt"></i> <span id="recordCountDisplay">0 records</span></span>
+                    <span><i class="fas fa-money-bill-wave"></i> <span id="totalAmountDisplay">₦0</span></span>
+                    <span>
+                        <button class="btn-outline-small" id="changePasswordLink">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
+                    </span>
+                </div>
+
+                <div class="filter-group" id="filterControls">
+                    <div class="form-group">
+                        <label><i class="fas fa-users"></i> Filter by Class</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-users"></i>
+                            <select id="classFilter">
+                                <option value="">All Classes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-filter" id="applyFilterBtn">
+                        <i class="fas fa-filter"></i> Apply
+                    </button>
+                    <button class="btn btn-outline btn-filter" id="clearFilterBtn" style="background: var(--gray-100); border-color: var(--gray-300);">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+            </div>
+
+            <div class="summary-stats" id="summaryStats">
+                <div class="summary-stat">
+                    <div class="number" id="statCount">0</div>
+                    <div class="label">Total Payments</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="number" id="statAmount">₦0</div>
+                    <div class="label">Total Amount</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="number" id="statStudents">0</div>
+                    <div class="label">Students</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="number" id="statClasses">0</div>
+                    <div class="label">Classes</div>
+                </div>
+            </div>
+
+            <button class="btn btn-download" id="downloadBtn" disabled>
+                <i class="fas fa-file-pdf"></i> Download Payment Report (PDF)
+            </button>
+            <button class="btn btn-outline" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+
+            <div id="statusMessage"></div>
+
+            <div id="tableWrap" class="table-wrap hidden">
+                <table id="previewTable"></table>
+            </div>
+            <div id="scrollHint" class="table-scroll-hint hidden">
+                <i class="fas fa-arrows-left-right"></i> Scroll sideways to see all columns
+            </div>
+
+            <div class="info-note">
+                <i class="fas fa-info-circle"></i>
+                This report shows all payment transactions made through the bursar portal. 
+                Click "Download Payment Report" to save as PDF.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ==================== CONFIGURATION ====================
+        // ⚠️ IMPORTANT: Replace this URL with your Google Apps Script Web App URL
+        const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbztpYzp9TPJQamaQKRPI5LGcha-QaD2Y4VUYgjzu43VVCel4D5R_eQtNO-45gElL6dL6g/exec';
+        
+        function apiCall(action, data, callback) {
+            const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            
+            let url = API_BASE_URL + '?action=' + encodeURIComponent(action);
+            for (let key in data) {
+                if (data.hasOwnProperty(key) && data[key] !== null && data[key] !== undefined) {
+                    url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(data[key]));
+                }
+            }
+            url += '&callback=' + callbackName;
+            
+            console.log("API Call URL:", url);
+            
+            const script = document.createElement('script');
+            script.src = url;
+            
+            window[callbackName] = function(response) {
+                console.log("API Response for " + action + ":", response);
+                delete window[callbackName];
+                if (script.parentNode) script.remove();
+                callback(response);
+            };
+            
+            script.onerror = function() {
+                console.error("Script error for action:", action);
+                delete window[callbackName];
+                if (script.parentNode) script.remove();
+                callback({ authenticated: false, error: 'Network error' });
+            };
+            
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    console.warn("Timeout for action:", action);
+                    delete window[callbackName];
+                    if (script.parentNode) script.remove();
+                    callback({ authenticated: false, error: 'Request timeout' });
+                }
+            }, 30000);
+            
+            document.body.appendChild(script);
+        }
+        
+        var currentUser = null;
+        var allClasses = [];
+        var currentFilter = '';
+        var reportData = null;
+
+        var loginSection = document.getElementById('loginSection');
+        var reportSection = document.getElementById('reportSection');
+        var loginEmail = document.getElementById('loginEmail');
+        var loginPassword = document.getElementById('loginPassword');
+        var loginBtn = document.getElementById('loginBtn');
+        var loginError = document.getElementById('loginError');
+        var logoutBtn = document.getElementById('logoutBtn');
+        var downloadBtn = document.getElementById('downloadBtn');
+        var schoolNameDisplay = document.getElementById('schoolNameDisplay');
+        var termDisplay = document.getElementById('termDisplay');
+        var recordCountDisplay = document.getElementById('recordCountDisplay');
+        var totalAmountDisplay = document.getElementById('totalAmountDisplay');
+        var statusMessage = document.getElementById('statusMessage');
+        var tableWrap = document.getElementById('tableWrap');
+        var previewTable = document.getElementById('previewTable');
+        var scrollHint = document.getElementById('scrollHint');
+        var classFilter = document.getElementById('classFilter');
+        var applyFilterBtn = document.getElementById('applyFilterBtn');
+        var clearFilterBtn = document.getElementById('clearFilterBtn');
+        var downloadOverlay = document.getElementById('downloadOverlay');
+        var progressFill = document.getElementById('progressFill');
+        var statCount = document.getElementById('statCount');
+        var statAmount = document.getElementById('statAmount');
+        var statStudents = document.getElementById('statStudents');
+        var statClasses = document.getElementById('statClasses');
+
+        var passwordModal = document.getElementById('passwordModal');
+        var closeModalBtn = document.getElementById('closeModalBtn');
+        var changePasswordLink = document.getElementById('changePasswordLink');
+        var changePasswordBtn = document.getElementById('changePasswordBtn');
+        var currentPassword = document.getElementById('currentPassword');
+        var newPassword = document.getElementById('newPassword');
+        var confirmPassword = document.getElementById('confirmPassword');
+        var modalStatus = document.getElementById('modalStatus');
+
+        function showLoginError(msg) {
+            loginError.classList.remove('hidden');
+            loginError.textContent = msg || 'Invalid credentials. Please try again.';
+        }
+
+        function clearLoginError() {
+            loginError.classList.add('hidden');
+            loginError.textContent = '';
+        }
+
+        function showStatus(type, html) {
+            statusMessage.innerHTML = '<div class="status-message ' + type + '">' + html + '</div>';
+        }
+
+        function clearStatus() {
+            statusMessage.innerHTML = '';
+        }
+
+        function showModalStatus(type, msg) {
+            modalStatus.innerHTML = '<div class="status-message ' + type + '" style="margin-bottom:0;">' + msg + '</div>';
+        }
+
+        function clearModalStatus() {
+            modalStatus.innerHTML = '';
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            var div = document.createElement('div');
+            div.textContent = String(text);
+            return div.innerHTML;
+        }
+
+        function showOverlay() {
+            downloadOverlay.classList.add('active');
+            progressFill.style.width = '0%';
+        }
+
+        function hideOverlay() {
+            downloadOverlay.classList.remove('active');
+            progressFill.style.width = '0%';
+        }
+
+        function updateProgress(percent) {
+            progressFill.style.width = Math.min(percent, 100) + '%';
+        }
+
+        function downloadBlob(blob, filename) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename || 'payment_history.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function() {
+                URL.revokeObjectURL(url);
+            }, 5000);
+        }
+
+        // ============================================================
+        // CHANGE PASSWORD
+        // ============================================================
+        function changePassword() {
+            var current = currentPassword.value.trim();
+            var newPass = newPassword.value.trim();
+            var confirm = confirmPassword.value.trim();
+
+            if (!current || !newPass || !confirm) {
+                showModalStatus('error', 'Please fill in all fields.');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                showModalStatus('error', 'New password must be at least 6 characters.');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                showModalStatus('error', 'Passwords do not match.');
+                return;
+            }
+
+            changePasswordBtn.disabled = true;
+            changePasswordBtn.innerHTML = '<i class="fas fa-spinner spin"></i> Updating...';
+            clearModalStatus();
+
+            apiCall('changePassword', {
+                email: currentUser.email,
+                currentPassword: current,
+                newPassword: newPass
+            }, function(result) {
+                changePasswordBtn.disabled = false;
+                changePasswordBtn.innerHTML = '<i class="fas fa-save"></i> Update Password';
+
+                if (result && result.success) {
+                    showModalStatus('success', '✅ Password updated successfully!');
+                    currentPassword.value = '';
+                    newPassword.value = '';
+                    confirmPassword.value = '';
+                    
+                    setTimeout(function() {
+                        passwordModal.classList.remove('active');
+                        clearModalStatus();
+                    }, 2000);
+                } else {
+                    showModalStatus('error', result && result.error ? result.error : 'Failed to update password.');
+                }
+            });
+        }
+
+        // ============================================================
+        // CALCULATE TOTALS
+        // ============================================================
+        function calculateClassTotals(rows) {
+            var totals = {
+                schoolFees: 0,
+                registrationFee: 0,
+                booksFee: 0,
+                totalAmount: 0,
+                count: 0
+            };
+            
+            rows.forEach(function(row) {
+                var fee = parseFloat(String(row[6] || '0').replace(/[₦,]/g, '')) || 0;
+                var reg = parseFloat(String(row[7] || '0').replace(/[₦,]/g, '')) || 0;
+                var levy = parseFloat(String(row[8] || '0').replace(/[₦,]/g, '')) || 0;
+                var total = parseFloat(String(row[9] || '0').replace(/[₦,]/g, '')) || 0;
+                
+                totals.schoolFees += fee;
+                totals.registrationFee += reg;
+                totals.booksFee += levy;
+                totals.totalAmount += total;
+                totals.count++;
+            });
+            
+            return totals;
+        }
+
+        function populateClassFilter(classes) {
+            allClasses = classes || [];
+            classFilter.innerHTML = '<option value="">All Classes</option>';
+            allClasses.forEach(function(cls) {
+                var opt = document.createElement('option');
+                opt.value = cls;
+                opt.textContent = cls;
+                classFilter.appendChild(opt);
+            });
+            if (currentFilter) {
+                classFilter.value = currentFilter;
+            }
+        }
+
+        function loadClasses() {
+            if (!currentUser || !currentUser.schoolName) return;
+
+            apiCall('getClassesFromSchoolTab', { schoolTab: currentUser.schoolTab || currentUser.schoolName }, function(classes) {
+                if (Array.isArray(classes)) {
+                    populateClassFilter(classes);
+                    statClasses.textContent = classes.length;
+                }
+            });
+        }
+
+        // ============================================================
+        // LOGIN - BURSAR ONLY
+        // ============================================================
+        function performLogin(email, password) {
+            clearLoginError();
+
+            if (!email || !password) {
+                showLoginError('Please enter both email and password.');
+                return;
+            }
+
+            loginBtn.innerHTML = '<i class="fas fa-spinner spin"></i> Logging in...';
+            loginBtn.disabled = true;
+
+            apiCall('validateLogin', { email: email, password: password }, function(userData) {
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+                loginBtn.disabled = false;
+
+                if (!userData || !userData.authenticated) {
+                    showLoginError(userData && userData.error ? userData.error : 'Invalid credentials.');
+                    return;
+                }
+
+                // ============================================================
+                // CHECK ROLE - MUST BE "bursar" to access this page
+                // ============================================================
+                var userRole = (userData.role || '').toLowerCase();
+                if (userRole !== 'bursar') {
+                    showLoginError('⛔ Access Denied. Only Bursar users can view payment reports.');
+                    return;
+                }
+
+                currentUser = userData;
+                loginSection.classList.add('hidden');
+                reportSection.classList.remove('hidden');
+
+                schoolNameDisplay.textContent = currentUser.schoolName || 'School';
+                termDisplay.textContent = currentUser.term || '2025/2026';
+                clearStatus();
+
+                loadClasses();
+                loadTransactionsData(currentUser.schoolName);
+            });
+        }
+
+        function loadTransactionsData(schoolName, className) {
+            downloadBtn.disabled = true;
+            tableWrap.classList.add('hidden');
+            scrollHint.classList.add('hidden');
+            clearStatus();
+            showStatus('info', '<i class="fas fa-spinner spin"></i> Loading payment history...');
+
+            var filter = className || currentFilter || '';
+
+            apiCall('getTransactionsData', { schoolName: schoolName }, function(result) {
+                if (!result || result.error) {
+                    clearStatus();
+                    showStatus('error', '<i class="fas fa-exclamation-circle"></i> ' + escapeHtml(result && result.error ? result.error : 'Could not load payment history.'));
+                    return;
+                }
+
+                reportData = result;
+                var filteredResult = applyClassFilter(reportData, filter);
+                renderPreviewTable(filteredResult);
+                updateStats(filteredResult);
+                clearStatus();
+                downloadBtn.disabled = false;
+            });
+        }
+
+        function updateStats(data) {
+            var rows = data.rows || [];
+            var totals = data.classTotals || { totalAmount: 0, count: 0 };
+            
+            statCount.textContent = rows.length;
+            statAmount.textContent = '₦' + totals.totalAmount.toLocaleString();
+            
+            var uniqueStudents = new Set();
+            rows.forEach(function(row) {
+                if (row[2]) uniqueStudents.add(row[2]);
+            });
+            statStudents.textContent = uniqueStudents.size;
+        }
+
+        function applyClassFilter(data, className) {
+            if (!data || !data.rows) return data;
+
+            var filteredRows = [];
+            var classColIndex = 3;
+
+            if (!className) {
+                filteredRows = data.rows.slice();
+            } else {
+                data.rows.forEach(function(row) {
+                    var rowClass = String(row[classColIndex] || '').trim();
+                    if (rowClass === className) {
+                        filteredRows.push(row);
+                    }
+                });
+            }
+
+            var classTotals = calculateClassTotals(filteredRows);
+
+            return {
+                schoolName: data.schoolName,
+                sheetName: data.sheetName,
+                header: data.header,
+                totals: data.totals,
+                rows: filteredRows,
+                classTotals: classTotals,
+                filterClass: className
+            };
+        }
+
+        // ============================================================
+        // RENDER PREVIEW TABLE
+        // ============================================================
+        function renderPreviewTable(data) {
+            var header = data.header || [];
+            var totals = data.totals || [];
+            var rows = data.rows || [];
+            var classTotals = data.classTotals || { schoolFees: 0, registrationFee: 0, booksFee: 0, totalAmount: 0, count: 0 };
+
+            recordCountDisplay.textContent = rows.length + ' payments';
+            totalAmountDisplay.textContent = '₦' + classTotals.totalAmount.toLocaleString();
+
+            if (header.length === 0) {
+                tableWrap.classList.add('hidden');
+                scrollHint.classList.add('hidden');
+                return;
+            }
+
+            var html = '<thead><tr>';
+            header.forEach(function(cell) {
+                html += '<th>' + escapeHtml(cell) + '</th>';
+            });
+            html += '</tr></thead><tbody>';
+
+            if (classTotals.count > 0) {
+                var className = data.filterClass || 'All Classes';
+                var classLabel = '📊 ' + className + ' Totals';
+                
+                html += '<tr class="class-totals-row">';
+                html += '<td><strong>' + classLabel + '</strong> (' + classTotals.count + ' payments)</td>';
+                html += '<td></td><td></td><td></td><td></td><td></td>';
+                html += '<td><strong>₦' + classTotals.schoolFees.toLocaleString() + '</strong></td>';
+                html += '<td><strong>₦' + classTotals.registrationFee.toLocaleString() + '</strong></td>';
+                html += '<td><strong>₦' + classTotals.booksFee.toLocaleString() + '</strong></td>';
+                html += '<td><strong>₦' + classTotals.totalAmount.toLocaleString() + '</strong></td>';
+                html += '<td></td><td></td>';
+                html += '</tr>';
+            }
+
+            if (totals.length > 0) {
+                html += '<tr class="totals-row">';
+                totals.forEach(function(cell) {
+                    html += '<td>' + escapeHtml(cell) + '</td>';
+                });
+                html += '</tr>';
+            }
+
+            if (rows.length === 0) {
+                html += '<tr><td colspan="' + header.length + '" style="text-align:center;padding:20px;color:var(--gray-500);">No payment records found for this class.</td></tr>';
+            } else {
+                rows.forEach(function(row) {
+                    html += '<tr>';
+                    row.forEach(function(cell) {
+                        html += '<td>' + escapeHtml(cell) + '</td>';
+                    });
+                    html += '</tr>';
+                });
+            }
+
+            html += '</tbody>';
+            previewTable.innerHTML = html;
+            tableWrap.classList.remove('hidden');
+            scrollHint.classList.remove('hidden');
+        }
+
+        function downloadReport() {
+            if (!reportData || !reportData.header || reportData.header.length === 0) {
+                showStatus('error', '<i class="fas fa-exclamation-circle"></i> No payment data loaded yet.');
+                return;
+            }
+
+            if (typeof window.jspdf === 'undefined') {
+                showStatus('error', '<i class="fas fa-exclamation-circle"></i> PDF library failed to load. Please check your connection.');
+                return;
+            }
+
+            showOverlay();
+            updateProgress(10);
+
+            try {
+                var filter = currentFilter || '';
+                var dataForPdf = applyClassFilter(reportData, filter);
+                var classTotals = dataForPdf.classTotals || { schoolFees: 0, registrationFee: 0, booksFee: 0, totalAmount: 0, count: 0 };
+
+                updateProgress(30);
+
+                var jsPDF = window.jspdf.jsPDF;
+                var doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+                var pageWidth = doc.internal.pageSize.getWidth();
+                var schoolName = reportData.schoolName || (currentUser ? currentUser.schoolName : 'School');
+
+                updateProgress(50);
+
+                doc.setFontSize(16);
+                doc.setTextColor(26, 93, 171);
+                var title = schoolName + ' - Payment History Report';
+                if (filter) title += ' (' + filter + ')';
+                doc.text(title, 24, 26);
+
+                doc.setFontSize(8);
+                doc.setTextColor(100, 116, 139);
+                var generatedOn = new Date().toLocaleString();
+                doc.text('Generated: ' + generatedOn + ' | Report Type: Payment History', 24, 38);
+
+                updateProgress(60);
+
+                var startY = 46;
+                if (classTotals.count > 0) {
+                    doc.setFontSize(9);
+                    doc.setTextColor(0, 0, 0);
+                    var classLabel = filter || 'All Classes';
+                    var summaryText = '📊 ' + classLabel + ' Summary: ' + classTotals.count + ' payments';
+                    doc.text(summaryText, 24, startY);
+                    
+                    doc.setFontSize(8);
+                    doc.setTextColor(60, 60, 60);
+                    var feeText = 'School Fees: ₦' + classTotals.schoolFees.toLocaleString();
+                    var regText = 'Registration: ₦' + classTotals.registrationFee.toLocaleString();
+                    var levyText = 'Books Levy: ₦' + classTotals.booksFee.toLocaleString();
+                    var totalText = 'Total Amount: ₦' + classTotals.totalAmount.toLocaleString();
+                    
+                    doc.text(feeText, 24, startY + 12);
+                    doc.text(regText, 160, startY + 12);
+                    doc.text(levyText, 24, startY + 24);
+                    doc.text(totalText, 160, startY + 24);
+                    
+                    startY = startY + 38;
+                }
+
+                updateProgress(70);
+
+                var bodyRows = [];
+                if (dataForPdf.totals && dataForPdf.totals.length > 0) {
+                    bodyRows.push(dataForPdf.totals);
+                }
+                (dataForPdf.rows || []).forEach(function(r) { bodyRows.push(r); });
+
+                doc.autoTable({
+                    head: [dataForPdf.header],
+                    body: bodyRows,
+                    startY: startY,
+                    theme: 'grid',
+                    styles: { fontSize: 7, cellPadding: 3, overflow: 'linebreak' },
+                    headStyles: { fillColor: [26, 93, 171], textColor: 255, fontStyle: 'bold' },
+                    margin: { left: 20, right: 20 },
+                    tableWidth: pageWidth - 40,
+                    didParseCell: function(data) {
+                        if (data.section === 'body' && data.row.index === 0 && dataForPdf.totals && dataForPdf.totals.length > 0) {
+                            data.cell.styles.fillColor = [232, 240, 254];
+                            data.cell.styles.textColor = [18, 74, 138];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                });
+
+                updateProgress(90);
+
+                var safeName = schoolName.replace(/[\\\/:*?"<>|]/g, '').trim() || 'School';
+                var dateTag = new Date().toISOString().slice(0, 10);
+                var filename = safeName + ' Payment History ' + dateTag + '.pdf';
+                if (filter) filename = safeName + ' ' + filter + ' Payment History ' + dateTag + '.pdf';
+
+                var blob = doc.output('blob');
+                downloadBlob(blob, filename);
+
+                updateProgress(100);
+                setTimeout(hideOverlay, 500);
+                showStatus('success', '<i class="fas fa-check-circle"></i> Payment report downloaded successfully!');
+
+            } catch (err) {
+                hideOverlay();
+                showStatus('error', '<i class="fas fa-exclamation-circle"></i> Could not generate the PDF: ' + escapeHtml(err.message || err));
+                console.error('PDF generation error:', err);
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            reportData = null;
+            allClasses = [];
+            currentFilter = '';
+            loginSection.classList.remove('hidden');
+            reportSection.classList.add('hidden');
+            loginEmail.value = '';
+            loginPassword.value = '';
+            classFilter.innerHTML = '<option value="">All Classes</option>';
+            clearLoginError();
+            clearStatus();
+            tableWrap.classList.add('hidden');
+            scrollHint.classList.add('hidden');
+            previewTable.innerHTML = '';
+            downloadBtn.disabled = true;
+            recordCountDisplay.textContent = '0 records';
+            totalAmountDisplay.textContent = '₦0';
+            statCount.textContent = '0';
+            statAmount.textContent = '₦0';
+            statStudents.textContent = '0';
+            statClasses.textContent = '0';
+            hideOverlay();
+            passwordModal.classList.remove('active');
+            clearModalStatus();
+        }
+
+        // ============================================================
+        // EVENT LISTENERS
+        // ============================================================
+        loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            performLogin(loginEmail.value.trim(), loginPassword.value.trim());
+        });
+
+        downloadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            downloadReport();
+        });
+
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+        });
+
+        applyFilterBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var selectedClass = classFilter.value;
+            currentFilter = selectedClass;
+            if (currentUser && currentUser.schoolName) {
+                loadTransactionsData(currentUser.schoolName, selectedClass);
+            }
+        });
+
+        clearFilterBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            classFilter.value = '';
+            currentFilter = '';
+            if (currentUser && currentUser.schoolName) {
+                loadTransactionsData(currentUser.schoolName, '');
+            }
+        });
+
+        changePasswordLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentPassword.value = '';
+            newPassword.value = '';
+            confirmPassword.value = '';
+            clearModalStatus();
+            passwordModal.classList.add('active');
+        });
+
+        closeModalBtn.addEventListener('click', function() {
+            passwordModal.classList.remove('active');
+            clearModalStatus();
+        });
+
+        passwordModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                passwordModal.classList.remove('active');
+                clearModalStatus();
+            }
+        });
+
+        changePasswordBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            changePassword();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (passwordModal.classList.contains('active')) {
+                    changePassword();
+                } else if (!loginSection.classList.contains('hidden')) {
+                    loginBtn.click();
+                }
+            }
+            if (e.key === 'Escape') {
+                passwordModal.classList.remove('active');
+                clearModalStatus();
+            }
+        });
+    })();
+</script>
+</body>
+</html>
