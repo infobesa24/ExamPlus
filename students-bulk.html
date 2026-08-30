@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+  <title>Bulk Student Registration · Admin</title>
+  <style>
+    /* ===== RESET & GLOBAL ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background: #f5f7fb;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, sans-serif;
+      background: #f5f7fb;
+      min-height: 100vh;
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    /* ===== VIBRATING ICON (entry point) ===== */
+    .icon-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 80vh;
+    }
+
+    .vibrating-icon {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #2a8f6e, #0f4a34);
+      box-shadow: 
+        0 12px 28px rgba(0, 0, 0, 0.6),
+        0 0 0 4px rgba(255, 255, 255, 0.08),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 4px 8px rgba(255, 255, 255, 0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      animation: vibrate 2.4s infinite ease-in-out, glowPulse 3.2s infinite alternate;
+      color: white;
+      font-weight: 800;
+      font-size: 1.3rem;
+      letter-spacing: 0.03em;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      line-height: 1.2;
+      padding: 20px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .vibrating-icon:active {
+      transform: scale(0.92);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8), 0 0 0 4px rgba(255, 255, 255, 0.15);
+      animation: none;
+      transition: transform 0.06s;
+    }
+
+    @keyframes vibrate {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      10% { transform: translate(-2px, -2px) rotate(-0.6deg); }
+      20% { transform: translate(2px, -1px) rotate(0.8deg); }
+      30% { transform: translate(-1px, 2px) rotate(-0.4deg); }
+      40% { transform: translate(1px, -2px) rotate(0.6deg); }
+      50% { transform: translate(-2px, 1px) rotate(-0.8deg); }
+      60% { transform: translate(2px, 2px) rotate(0.4deg); }
+      70% { transform: translate(-1px, -1px) rotate(-0.3deg); }
+      80% { transform: translate(1px, 1px) rotate(0.3deg); }
+      90% { transform: translate(-1px, 1px) rotate(-0.2deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    @keyframes glowPulse {
+      0% { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(255, 255, 255, 0.06), inset 0 -4px 8px rgba(0, 0, 0, 0.3), inset 0 4px 8px rgba(255, 255, 255, 0.12); }
+      100% { box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 6px rgba(255, 255, 255, 0.12), inset 0 -4px 8px rgba(0, 0, 0, 0.4), inset 0 4px 8px rgba(255, 255, 255, 0.18); }
+    }
+
+    @media (max-width: 480px) {
+      .vibrating-icon {
+        width: 160px;
+        height: 160px;
+        font-size: 1.1rem;
+        padding: 16px;
+      }
+    }
+    @media (max-width: 360px) {
+      .vibrating-icon {
+        width: 140px;
+        height: 140px;
+        font-size: 0.95rem;
+        padding: 12px;
+      }
+    }
+
+    /* ===== LOGIN OVERLAY (admin only) ===== */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 20px;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .login-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .login-box {
+      background: #ffffff;
+      padding: 32px 24px 44px;
+      border-radius: 48px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
+      border: 1px solid #eef2f8;
+      animation: floatIn 0.4s ease;
+    }
+
+    @keyframes floatIn {
+      0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 480px) {
+      .login-box { border-radius: 40px; padding: 28px 20px 36px; }
+    }
+
+    .login-box .admin-badge {
+      display: inline-block;
+      background: #1e5a48;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 6px 20px;
+      border-radius: 40px;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .login-box h2 {
+      color: #1e3c2c;
+      margin-bottom: 28px;
+      font-weight: 800;
+      font-size: 1.8rem;
+      letter-spacing: -0.5px;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 16px 20px;
+      margin: 14px 0;
+      border: 2px solid #e2e8f0;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 500;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      outline: none;
+      color: #1e2a3a;
+    }
+
+    .login-box input:focus {
+      border-color: #0f9d58;
+      box-shadow: 0 0 0 4px rgba(15, 157, 88, 0.12);
+    }
+
+    .login-box input::placeholder {
+      color: #9aaec2;
+      font-weight: 450;
+      font-size: 0.9rem;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 16px 20px;
+      margin-top: 20px;
+      background: #0f9d58;
+      color: white;
+      border: none;
+      border-radius: 60px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 3px 8px rgba(15, 157, 88, 0.2);
+    }
+
+    .login-box button:active {
+      transform: scale(0.97);
+      background: #0b7e48;
+    }
+
+    .login-box .error {
+      margin-top: 20px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      background: #fef2f2;
+      padding: 10px 18px;
+      border-radius: 60px;
+      color: #dc3545;
+      display: none;
+      width: 100%;
+    }
+
+    .login-box .error.show {
+      display: inline-block;
+    }
+
+    .close-login {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      color: white;
+      font-size: 32px;
+      font-weight: 300;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      background: rgba(255,255,255,0.1);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .close-login:hover { background: rgba(255,255,255,0.2); }
+    .close-login:active { transform: scale(0.92); }
+
+    /* ===== MAIN APP (hidden until admin login) ===== */
+    .container {
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      border: 1px solid #eef2f8;
+      display: none;
+    }
+
+    .header {
+      background: #f8fafc;
+      padding: 16px 20px;
+      text-align: center;
+      border-bottom: 1px solid #eef2f8;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #1e3c2c;
+    }
+
+    .school-badge {
+      background: #e8f5e9;
+      padding: 8px 16px;
+      border-radius: 40px;
+      display: inline-block;
+      margin: 0 auto;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #2e7d32;
+    }
+
+    .logout-btn {
+      background: #f8fafc;
+      color: #dc3545;
+      border: 1px solid #e2e8f0;
+      padding: 8px 20px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.8rem;
+      transition: 0.2s;
+      align-self: flex-end;
+    }
+
+    .logout-btn:active {
+      transform: scale(0.96);
+    }
+
+    .form-container {
+      padding: 24px 20px 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1e3c2c;
+      font-size: 0.85rem;
+    }
+
+    label .required {
+      color: #dc3545;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 32px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      background: #ffffff;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: #0f9d58;
+      box-shadow: 0 0 0 3px rgba(15, 157, 88, 0.1);
+    }
+
+    .student-input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 24px;
+      margin-bottom: 12px;
+      border: 1px solid #eef2f8;
+    }
+
+    .student-input-row .field-group {
+      margin-bottom: 8px;
+    }
+
+    .student-input-row .field-group label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #4a5568;
+    }
+
+    .student-input-row .field-group input {
+      padding: 10px 14px;
+      border-radius: 24px;
+      font-size: 0.85rem;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-primary { background: #0f9d58; color: white; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-outline { background: transparent; color: #0f9d58; border: 2px solid #0f9d58; }
+    .btn-warning { background: #ffc107; color: #212529; }
+    .btn-sm { padding: 6px 14px; font-size: 0.75rem; }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .message {
+      margin-top: 16px;
+      padding: 12px 18px;
+      border-radius: 60px;
+      text-align: center;
+      display: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .message.success { background: #d4edda; color: #155724; display: block; }
+    .message.error { background: #f8d7da; color: #721c24; display: block; }
+    .message.info { background: #d1ecf1; color: #0c5460; display: block; }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .loading.active { display: block; }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #0f9d58;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .students-list {
+      margin-top: 24px;
+    }
+
+    .students-list h3 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: #1e3c2c;
+    }
+
+    .student-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 16px;
+      margin-bottom: 8px;
+      border: 1px solid #eef2f8;
+    }
+
+    .student-item .info {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .student-item .info span {
+      font-size: 0.85rem;
+    }
+
+    .student-item .info .adm {
+      font-weight: 700;
+      color: #0f9d58;
+    }
+
+    .student-item .info .name {
+      font-weight: 600;
+    }
+
+    .stats {
+      background: #e8f5e9;
+      padding: 8px 16px;
+      border-radius: 40px;
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #2e7d32;
+      margin-bottom: 16px;
+    }
+
+    .preview-section {
+      background: #f8fafc;
+      border-radius: 24px;
+      padding: 20px;
+      margin-top: 20px;
+      border: 2px dashed #c8d6e5;
+    }
+
+    .preview-section h4 { margin-bottom: 12px; color: #1e3c2c; }
+
+    .add-row-btn {
+      background: #e8f5e9;
+      color: #0f9d58;
+      border: 2px dashed #0f9d58;
+      padding: 12px;
+      border-radius: 24px;
+      width: 100%;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    .add-row-btn:active { transform: scale(0.98); }
+
+    .info-note {
+      background: #e3f2fd;
+      padding: 10px 16px;
+      border-radius: 28px;
+      margin-bottom: 16px;
+      font-size: 0.75rem;
+      color: #1565c0;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .bulk-textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 120px;
+      transition: 0.2s;
+    }
+
+    .bulk-textarea:focus {
+      outline: none;
+      border-color: #0f9d58;
+      box-shadow: 0 0 0 3px rgba(15, 157, 88, 0.1);
+    }
+
+    .bulk-textarea::placeholder { color: #9aaec2; }
+
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 40px;
+      background: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .tab-btn.active {
+      border-color: #0f9d58;
+      background: #e8f5e9;
+      color: #0f9d58;
+    }
+
+    .tab-btn:active { transform: scale(0.96); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    @media (max-width: 640px) {
+      .student-input-row { grid-template-columns: 1fr; gap: 8px; }
+      .student-item { flex-direction: column; align-items: stretch; gap: 8px; }
+      .tab-buttons { flex-direction: column; }
+      .btn-group { flex-direction: column; }
+      .btn-group .btn { width: 100%; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      .login-box { padding: 28px 20px 36px; border-radius: 40px; }
+      .login-box h2 { font-size: 1.7rem; margin-bottom: 22px; }
+      .login-box input { padding: 14px 16px; font-size: 0.9rem; }
+      .login-box button { padding: 14px 18px; font-size: 1rem; }
+      .form-container { padding: 16px 12px 24px; }
+    }
+
+    button { touch-action: manipulation; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== VIBRATING ICON (entry point) ===== -->
+  <div class="icon-wrapper" id="iconWrapper">
+    <div class="vibrating-icon" id="launcherIcon" role="button" aria-label="Bulk Student Registration">
+      Bulk<br />Student<br />Registration
+    </div>
+  </div>
+
+  <!-- ===== LOGIN OVERLAY (checks Users sheet) ===== -->
+  <div class="login-overlay" id="loginOverlay">
+    <span class="close-login" id="closeLoginBtn">✕</span>
+    <div class="login-box">
+      <div class="admin-badge">🔐 ADMIN ONLY</div>
+      <h2>📚 Bulk Student Registration</h2>
+      <input type="email" id="email" placeholder="Email address" autocomplete="email" inputmode="email">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+      <button onclick="doLogin()">→ Login To Access ←</button>
+      <div id="loginError" class="error"></div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP (hidden until successful login) ===== -->
+  <div id="appSection" class="container">
+    <div class="header">
+      <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+      <h1>📚 Bulk Student Registration</h1>
+      <div class="school-badge" id="schoolTabBadge">🏫 Admin Panel</div>
+    </div>
+
+    <div class="form-container">
+      <div class="info-note">
+        📌 Select a class, then add students one by one or paste a list. Admission numbers (ADM 001, ADM 002, etc.) are auto-generated.
+      </div>
+
+      <div class="form-group">
+        <label>🏫 Select Class <span class="required">*</span></label>
+        <select id="classSelect">
+          <option value="">-- Select Class --</option>
+        </select>
+      </div>
+
+      <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab('single')">➕ Add One by One</button>
+        <button class="tab-btn" onclick="switchTab('bulk')">📋 Bulk Add</button>
+        <button class="tab-btn" onclick="switchTab('view')">👥 View Students</button>
+      </div>
+
+      <!-- Single Add Tab -->
+      <div id="tabSingle" class="tab-content active">
+        <div id="studentRows">
+          <div class="student-input-row">
+            <div class="field-group">
+              <label>👤 Student Name <span class="required">*</span></label>
+              <input type="text" class="student-name" placeholder="Enter student name">
+            </div>
+            <div class="field-group">
+              <label>📱 Parent Phone</label>
+              <input type="text" class="student-phone" placeholder="Parent phone number">
+            </div>
+            <div class="field-group">
+              <label>👨‍👩‍👦 Parent Name</label>
+              <input type="text" class="student-parent" placeholder="Parent/guardian name">
+            </div>
+            <div class="field-group">
+              <label>📅 Admission Year</label>
+              <input type="text" class="student-year" placeholder="e.g., 2024">
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="addStudentRow()">➕ Add Another Student</button>
+          <button class="btn btn-success" onclick="saveStudents()">💾 Register All Students</button>
+          <button class="btn btn-warning" onclick="clearRows()">🗑️ Clear All</button>
+        </div>
+      </div>
+
+      <!-- Bulk Add Tab -->
+      <div id="tabBulk" class="tab-content">
+        <div class="form-group">
+          <label>📋 Paste Student Names <span class="required">*</span></label>
+          <textarea id="bulkNames" class="bulk-textarea" placeholder="Enter one student name per line...
+
+Example:
+Alice Johnson
+Bob Smith
+Carol Davis"></textarea>
+          <div style="margin-top: 8px; font-size: 0.7rem; color: #7c8b9c;">
+            💡 Enter one student name per line. Optional: Add extra info after a comma (e.g., "Alice Johnson, 1234567890, Mr. John")
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-success" onclick="bulkAddStudents()">📋 Register Bulk Students</button>
+          <button class="btn btn-warning" onclick="clearBulk()">🗑️ Clear</button>
+        </div>
+
+        <div id="bulkPreview" class="preview-section" style="display:none;">
+          <h4>📋 Preview Students</h4>
+          <div id="bulkPreviewList"></div>
+        </div>
+      </div>
+
+      <!-- View Students Tab -->
+      <div id="tabView" class="tab-content">
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="loadStudents()">🔄 Refresh List</button>
+        </div>
+        <div id="studentsList" style="margin-top:16px;">
+          <div class="stats">📌 Select a class and click Refresh to view students</div>
+        </div>
+      </div>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 12px;">Processing...</p>
+      </div>
+
+      <div class="message" id="message"></div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== CONFIGURATION ====================
+    const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbytQl3TJ6y0LA5KTQK-WKqcdBTfUjzwAMGAcwR1PvlKl3EIEkkeJ08-txAHNIHkqRRDUg/exec';
+
+    // ==================== STATE ====================
+    let currentTabName = null;
+    let currentUserEmail = null;
+    let currentUserRole = null;
+    let isAdmin = false;
+
+    // ==================== ICON LOGIC ====================
+    function showLoginOverlay() {
+      document.getElementById('loginOverlay').classList.add('active');
+      if (navigator.vibrate) navigator.vibrate(10);
+      setTimeout(() => document.getElementById('email').focus(), 300);
+    }
+
+    function hideLoginOverlay() {
+      document.getElementById('loginOverlay').classList.remove('active');
+      document.getElementById('loginError').classList.remove('show');
+    }
+
+    // ==================== API CALLS ====================
+    function apiCall(action, data, callback) {
+      const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+      let url = API_BASE_URL + '?action=' + encodeURIComponent(action);
+      for (let key in data) {
+        if (data.hasOwnProperty(key) && data[key] !== null && data[key] !== undefined) {
+          url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(data[key]));
+        }
+      }
+      url += '&callback=' + callbackName;
+
+      const script = document.createElement('script');
+      script.src = url;
+
+      window[callbackName] = function(response) {
+        console.log("API Response for " + action + ":", response);
+        delete window[callbackName];
+        if (script.parentNode) script.remove();
+        callback(response);
+      };
+
+      script.onerror = function() {
+        console.error("Script error for action:", action);
+        delete window[callbackName];
+        if (script.parentNode) script.remove();
+        callback({ success: false, error: 'Network error' });
+      };
+
+      setTimeout(() => {
+        if (window[callbackName]) {
+          console.warn("Timeout for action:", action);
+          delete window[callbackName];
+          if (script.parentNode) script.remove();
+          callback({ success: false, error: 'Request timeout' });
+        }
+      }, 30000);
+
+      document.body.appendChild(script);
+    }
+
+    // ==================== LOGIN - checks Users sheet ====================
+    function doLogin() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const errorDiv = document.getElementById("loginError");
+
+      if (!email || !password) {
+        errorDiv.textContent = "Please enter email and password.";
+        errorDiv.classList.add('show');
+        return;
+      }
+
+      // Show loading state
+      const loginBtn = document.querySelector('.login-box button');
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = "Authenticating... <span class='spinner'></span>";
+      errorDiv.classList.remove('show');
+
+      // Call API to verify user from Users sheet
+      apiCall('loginUser', {
+        email: email,
+        password: password
+      }, function(response) {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = "→ Login To Access ←";
+
+        if (response && response.success) {
+          // User found - check role
+          const userRole = response.role || '';
+          const tabName = response.tabName || 'Students';
+
+          if (userRole.toLowerCase() === 'admin') {
+            // Admin access granted
+            currentUserEmail = email;
+            currentUserRole = userRole;
+            currentTabName = tabName;
+            isAdmin = true;
+
+            // Hide login and show app
+            document.getElementById('loginOverlay').classList.remove('active');
+            document.getElementById('iconWrapper').style.display = 'none';
+            document.getElementById('appSection').style.display = 'block';
+            document.getElementById('schoolTabBadge').innerHTML = "🏫 Admin: " + tabName;
+
+            loadClasses();
+            showMessage("✅ Welcome Admin! Login successful.", "success");
+          } else {
+            // Not admin
+            errorDiv.textContent = "❌ Access denied. Admin privileges required.";
+            errorDiv.classList.add('show');
+          }
+        } else {
+          // Login failed
+          errorDiv.textContent = response?.error || "❌ Invalid email or password. Please try again.";
+          errorDiv.classList.add('show');
+        }
+      });
+    }
+
+    // ==================== LOGOUT ====================
+    function doLogout() {
+      isAdmin = false;
+      currentTabName = null;
+      currentUserEmail = null;
+      currentUserRole = null;
+
+      document.getElementById('appSection').style.display = 'none';
+      document.getElementById('iconWrapper').style.display = 'flex';
+      document.getElementById('loginOverlay').classList.remove('active');
+
+      document.getElementById("email").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("loginError").classList.remove('show');
+
+      // Reset login button
+      const loginBtn = document.querySelector('.login-box button');
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = "→ Login To Access ←";
+
+      showMessage("👋 Logged out", "info");
+    }
+
+    // ==================== UI FUNCTIONS ====================
+    function showMessage(msg, type) {
+      const div = document.getElementById("message");
+      div.textContent = msg;
+      div.className = "message " + type;
+      div.style.display = "block";
+      setTimeout(() => {
+        div.style.display = "none";
+      }, 5000);
+    }
+
+    function escapeHtml(t) {
+      if (!t) return '';
+      return String(t).replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&';
+        if (m === '<') return '<';
+        if (m === '>') return '>';
+        return m;
+      });
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+      if (tab === 'single') {
+        document.getElementById('tabSingle').classList.add('active');
+        document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+      } else if (tab === 'bulk') {
+        document.getElementById('tabBulk').classList.add('active');
+        document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+      } else if (tab === 'view') {
+        document.getElementById('tabView').classList.add('active');
+        document.querySelector('.tab-btn:nth-child(3)').classList.add('active');
+        loadStudents();
+      }
+    }
+
+    // ==================== CLASSES ====================
+    function loadClasses() {
+      apiCall('getDistinctClasses', { tabName: currentTabName }, function(classes) {
+        console.log("Classes:", classes);
+        const select = document.getElementById("classSelect");
+        select.innerHTML = '<option value="">-- Select Class --</option>';
+
+        if (classes && classes.length > 0) {
+          classes.forEach(function(cls) {
+            const opt = document.createElement("option");
+            opt.value = cls;
+            opt.textContent = cls;
+            select.appendChild(opt);
+          });
+        }
+      });
+    }
+
+    // ==================== SINGLE ADD ====================
+    function addStudentRow() {
+      const container = document.getElementById("studentRows");
+      const row = document.createElement("div");
+      row.className = "student-input-row";
+      row.innerHTML = `
+        <div class="field-group">
+          <label>👤 Student Name <span class="required">*</span></label>
+          <input type="text" class="student-name" placeholder="Enter student name">
+        </div>
+        <div class="field-group">
+          <label>📱 Parent Phone</label>
+          <input type="text" class="student-phone" placeholder="Parent phone number">
+        </div>
+        <div class="field-group">
+          <label>👨‍👩‍👦 Parent Name</label>
+          <input type="text" class="student-parent" placeholder="Parent/guardian name">
+        </div>
+        <div class="field-group">
+          <label>📅 Admission Year</label>
+          <input type="text" class="student-year" placeholder="e.g., 2024">
+          <button class="btn btn-danger btn-sm" onclick="removeRow(this)" style="margin-top:8px;">✖ Remove</button>
+        </div>
+      `;
+      container.appendChild(row);
+    }
+
+    function removeRow(btn) {
+      const row = btn.closest('.student-input-row');
+      const rows = document.querySelectorAll('.student-input-row');
+      if (rows.length > 1) {
+        row.remove();
+      } else {
+        showMessage("You need at least one student row", "error");
+      }
+    }
+
+    function clearRows() {
+      const rows = document.querySelectorAll('.student-input-row');
+      if (rows.length > 1) {
+        rows.forEach(function(row, index) {
+          if (index > 0) row.remove();
+        });
+      }
+      const firstRow = document.querySelector('.student-input-row');
+      if (firstRow) {
+        firstRow.querySelector('.student-name').value = '';
+        firstRow.querySelector('.student-phone').value = '';
+        firstRow.querySelector('.student-parent').value = '';
+        firstRow.querySelector('.student-year').value = '';
+      }
+      showMessage("Cleared all student fields", "info");
+    }
+
+    function saveStudents() {
+      const className = document.getElementById("classSelect").value;
+      if (!className) {
+        showMessage("Please select a class", "error");
+        return;
+      }
+
+      const rows = document.querySelectorAll('.student-input-row');
+      const students = [];
+
+      rows.forEach(function(row) {
+        const name = row.querySelector('.student-name').value.trim();
+        if (name) {
+          students.push({
+            name: name,
+            phone: row.querySelector('.student-phone').value.trim(),
+            parentName: row.querySelector('.student-parent').value.trim(),
+            admissionYear: row.querySelector('.student-year').value.trim(),
+            address: '',
+            dob: ''
+          });
+        }
+      });
+
+      if (students.length === 0) {
+        showMessage("Please enter at least one student name", "error");
+        return;
+      }
+
+      document.getElementById("loading").classList.add("active");
+
+      apiCall('bulkAddStudents', {
+        tabName: currentTabName,
+        className: className,
+        students: students
+      }, function(result) {
+        document.getElementById("loading").classList.remove("active");
+
+        if (result && result.success) {
+          showMessage(result.message, "success");
+          clearRows();
+          if (document.getElementById('tabView').classList.contains('active')) {
+            loadStudents();
+          }
+        } else {
+          showMessage("Failed: " + (result?.message || "Unknown error"), "error");
+        }
+      });
+    }
+
+    // ==================== BULK ADD ====================
+    function clearBulk() {
+      document.getElementById("bulkNames").value = '';
+      document.getElementById("bulkPreview").style.display = 'none';
+    }
+
+    function bulkAddStudents() {
+      const className = document.getElementById("classSelect").value;
+      if (!className) {
+        showMessage("Please select a class", "error");
+        return;
+      }
+
+      const text = document.getElementById("bulkNames").value.trim();
+      if (!text) {
+        showMessage("Please paste student names", "error");
+        return;
+      }
+
+      const lines = text.split('\n').filter(function(line) { return line.trim(); });
+      if (lines.length === 0) {
+        showMessage("Please paste at least one student name", "error");
+        return;
+      }
+
+      const students = [];
+      lines.forEach(function(line) {
+        const parts = line.split(',').map(function(p) { return p.trim(); });
+        const student = {
+          name: parts[0] || '',
+          phone: parts[1] || '',
+          parentName: parts[2] || '',
+          admissionYear: parts[3] || '',
+          address: '',
+          dob: ''
+        };
+        if (student.name) {
+          students.push(student);
+        }
+      });
+
+      if (students.length === 0) {
+        showMessage("No valid student names found", "error");
+        return;
+      }
+
+      document.getElementById("loading").classList.add("active");
+
+      apiCall('bulkAddStudents', {
+        tabName: currentTabName,
+        className: className,
+        students: students
+      }, function(result) {
+        document.getElementById("loading").classList.remove("active");
+
+        if (result && result.success) {
+          showMessage(result.message, "success");
+          document.getElementById("bulkNames").value = '';
+          document.getElementById("bulkPreview").style.display = 'none';
+          if (document.getElementById('tabView').classList.contains('active')) {
+            loadStudents();
+          }
+        } else {
+          showMessage("Failed: " + (result?.message || "Unknown error"), "error");
+        }
+      });
+    }
+
+    // ==================== VIEW STUDENTS ====================
+    function loadStudents() {
+      const className = document.getElementById("classSelect").value;
+      if (!className) {
+        document.getElementById("studentsList").innerHTML = '<div class="stats">📌 Please select a class first</div>';
+        return;
+      }
+
+      document.getElementById("studentsList").innerHTML = '<div class="loading active"><div class="spinner"></div><p>Loading students...</p></div>';
+
+      apiCall('getStudentsByClass', {
+        tabName: currentTabName,
+        className: className
+      }, function(students) {
+        console.log("Students:", students);
+
+        if (!students || students.length === 0) {
+          document.getElementById("studentsList").innerHTML = '<div class="stats">📭 No students found in this class</div>';
+          return;
+        }
+
+        let html = '<div class="stats">👥 Total: ' + students.length + ' student(s)</div>';
+        students.forEach(function(s) {
+          html += `
+            <div class="student-item">
+              <div class="info">
+                <span class="adm">🎓 ${escapeHtml(s.admissionNumber)}</span>
+                <span class="name">${escapeHtml(s.name)}</span>
+                <span>📱 ${escapeHtml(s.parentPhone || 'N/A')}</span>
+                <span>👨‍👩‍👦 ${escapeHtml(s.parentName || 'N/A')}</span>
+              </div>
+            </div>
+          `;
+        });
+        document.getElementById("studentsList").innerHTML = html;
+      });
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    document.getElementById("launcherIcon").addEventListener("click", showLoginOverlay);
+    document.getElementById("closeLoginBtn").addEventListener("click", hideLoginOverlay);
+
+    document.getElementById("loginOverlay").addEventListener("click", function(e) {
+      if (e.target === this) hideLoginOverlay();
+    });
+
+    document.getElementById("password").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") doLogin();
+    });
+
+    window.addEventListener('load', function() {
+      document.getElementById('iconWrapper').style.display = 'flex';
+      document.getElementById('appSection').style.display = 'none';
+      document.getElementById('loginOverlay').classList.remove('active');
+    });
+  </script>
+
+</body>
+</html>
