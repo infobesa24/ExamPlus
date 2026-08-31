@@ -15,13 +15,11 @@
     --ink-dim:#8a8778;
     --line:#ece5d6;
 
-    --setup:#4c5fd5;      --setup-bg:#eaecfb;
-    --students:#1f9e85;   --students-bg:#e2f5f1;
-    --academics:#c8862a;  --academics-bg:#faf0dc;
-    --results:#d85f36;    --results-bg:#fbe9e1;
-    --finance:#2f9e52;    --finance-bg:#e3f5e9;
-    --system:#6b7280;     --system-bg:#eef0f1;
-    --account:#8b5cf6;    --account-bg:#f1ebfe;
+    --superadmin:#4c5fd5;   --superadmin-bg:#eaecfb;
+    --schooladmin:#1f9e85;  --schooladmin-bg:#e2f5f1;
+    --bursar:#2f9e52;       --bursar-bg:#e3f5e9;
+    --teacher:#d8862a;      --teacher-bg:#faf0dc;
+    --signup:#8b5cf6;       --signup-bg:#f1ebfe;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -33,18 +31,19 @@
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
   }
-  a{text-decoration:none; color:inherit;}
+  a, button{text-decoration:none; color:inherit; font-family:inherit;}
+  button{background:none; border:none; cursor:pointer;}
 
   .wrap{max-width:1000px; margin:0 auto; padding:56px 20px 70px;}
 
   /* ---- hero ---- */
-  .hero{text-align:center; margin-bottom:52px;}
+  .hero{text-align:center; margin-bottom:48px;}
   .hero .badge{
     width:64px; height:64px;
     margin:0 auto 20px;
     border-radius:20px;
     display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(135deg, var(--setup), var(--account));
+    background:linear-gradient(135deg, var(--superadmin), var(--signup));
     color:#fff; font-size:26px;
     box-shadow:0 12px 28px rgba(76,95,213,0.25);
   }
@@ -55,72 +54,80 @@
     margin:0;
     line-height:1.08;
   }
-  h1 span{color:var(--setup);}
+  h1 span{color:var(--superadmin);}
 
-  /* ---- groups ---- */
-  .group{margin-bottom:38px;}
-  .group-label{
-    font-size:12px;
-    font-weight:600;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    color:var(--ink-dim);
-    margin:0 0 16px 4px;
-  }
-
+  /* ---- grid shared ---- */
   .grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
-    gap:14px;
+    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+    gap:16px;
   }
 
   .card{
     background:var(--card);
     border:1px solid var(--line);
-    border-radius:18px;
-    padding:22px 10px 16px;
+    border-radius:20px;
+    padding:26px 12px 18px;
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:12px;
+    gap:14px;
     text-align:center;
     opacity:0;
     transform:translateY(10px);
     animation:rise .5s ease forwards;
-    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    transition:transform .18s ease, box-shadow .18s ease;
   }
   .card:hover, .card:focus-visible{
     transform:translateY(-4px);
     box-shadow:0 14px 26px rgba(30,35,64,0.09);
-    border-color:transparent;
     outline:none;
   }
   @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
 
   .icon{
-    width:52px; height:52px;
-    border-radius:14px;
+    width:58px; height:58px;
+    border-radius:16px;
     display:flex; align-items:center; justify-content:center;
-    font-size:20px;
+    font-size:22px;
     transition:transform .18s ease;
   }
   .card:hover .icon{transform:scale(1.06);}
 
-  .card span.label{
-    font-size:13px;
+  .card .label{font-size:14px; font-weight:600; color:var(--ink); line-height:1.25;}
+
+  /* role color classes */
+  .role-superadmin  .icon{ background:var(--superadmin-bg);  color:var(--superadmin); }
+  .role-schooladmin .icon{ background:var(--schooladmin-bg); color:var(--schooladmin); }
+  .role-bursar      .icon{ background:var(--bursar-bg);      color:var(--bursar); }
+  .role-teacher     .icon{ background:var(--teacher-bg);     color:var(--teacher); }
+  .role-signup      .icon{ background:var(--signup-bg);      color:var(--signup); }
+
+  /* sub-card sizes slightly smaller */
+  .subgrid .card{padding:22px 10px 16px;}
+  .subgrid .icon{width:50px; height:50px; font-size:19px;}
+  .subgrid .label{font-size:13px;}
+
+  /* ---- detail view ---- */
+  #detail{display:none;}
+  .back{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13px; font-weight:600;
+    color:var(--ink-dim);
+    margin-bottom:22px;
+    padding:8px 4px;
+  }
+  .back:hover{color:var(--ink);}
+  .detail-head{display:flex; align-items:center; gap:14px; margin-bottom:28px;}
+  .detail-head .icon{width:48px; height:48px; font-size:19px; flex-shrink:0;}
+  .detail-head h2{
+    font-family:'Fraunces', serif;
     font-weight:600;
-    color:var(--ink);
-    line-height:1.25;
+    font-size:1.5rem;
+    margin:0;
   }
 
-  /* category colors */
-  .Setup     .icon{ background:var(--setup-bg);     color:var(--setup); }
-  .Students  .icon{ background:var(--students-bg);  color:var(--students); }
-  .Academics .icon{ background:var(--academics-bg); color:var(--academics); }
-  .Results   .icon{ background:var(--results-bg);   color:var(--results); }
-  .Finance   .icon{ background:var(--finance-bg);   color:var(--finance); }
-  .System    .icon{ background:var(--system-bg);    color:var(--system); }
-  .Account   .icon{ background:var(--account-bg);   color:var(--account); }
+  #home.hidden, #detail.hidden{display:none;}
 
   @media (prefers-reduced-motion: reduce){
     .card{animation:none; opacity:1; transform:none;}
@@ -136,63 +143,133 @@
     <h1>Welcome to <span>EXAMPLUS</span></h1>
   </div>
 
-  <div id="groups"></div>
+  <div id="home">
+    <div class="grid" id="roleGrid"></div>
+  </div>
+
+  <div id="detail">
+    <button class="back" id="backBtn"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="detail-head">
+      <div class="icon" id="detailIcon"></div>
+      <h2 id="detailTitle"></h2>
+    </div>
+    <div class="grid subgrid" id="subGrid"></div>
+  </div>
 
 </div>
 
 <script>
 /* ============================================================
-   PAGE CONFIG — edit to match the files in your repo.
-   file:     relative path to the .html file
-   title:    label shown under the icon
-   icon:     Font Awesome class (fa-solid fa-...)
-   category: groups pages under a header (also used for color)
+   ROLE CONFIG — edit to match your repo.
+   Each role has an id (used for color class role-{id}), title,
+   icon, and a list of sub-pages (file + title + icon).
+   Files marked "PLACEHOLDER" don't exist yet — replace with the
+   real filename once created.
    ============================================================ */
-const PAGES = [
-  { file: "school.html",           title: "School Profile",   icon: "fa-solid fa-school",              category: "Setup" },
-  { file: "create-school.html",    title: "Create School",    icon: "fa-solid fa-square-plus",         category: "Setup" },
-  { file: "view-schools.html",     title: "View Schools",     icon: "fa-solid fa-building-columns",    category: "Setup" },
-
-  { file: "students.html",         title: "Students",         icon: "fa-solid fa-user-graduate",       category: "Students" },
-  { file: "students-bulk.html",    title: "Bulk Students",    icon: "fa-solid fa-users",               category: "Students" },
-
-  { file: "subjects.html",         title: "Subjects",         icon: "fa-solid fa-book",                category: "Academics" },
-
-  { file: "upload-result.html",    title: "Upload Results",   icon: "fa-solid fa-upload",              category: "Results" },
-  { file: "view-results.html",     title: "View Results",     icon: "fa-solid fa-chart-line",          category: "Results" },
-  { file: "assessment.htm",        title: "Assessment",       icon: "fa-solid fa-clipboard-check",     category: "Results" },
-  { file: "report.html",           title: "Report Cards",     icon: "fa-solid fa-file-lines",          category: "Results" },
-
-  { file: "generate-receipt.html", title: "Generate Receipt", icon: "fa-solid fa-receipt",             category: "Finance" },
-  { file: "receipt-history.html",  title: "Receipt History",  icon: "fa-solid fa-clock-rotate-left",   category: "Finance" },
-
-  { file: "settings.html",         title: "Settings",         icon: "fa-solid fa-gear",                category: "System" },
-
-  /* TODO: confirm the real filename for signup/activation */
-  { file: "signup.html",           title: "Signup / Activate", icon: "fa-solid fa-user-plus",          category: "Account" }
+const ROLES = [
+  {
+    id: "superadmin",
+    title: "Super Admin",
+    icon: "fa-solid fa-user-shield",
+    subs: [
+      { file: "create-school.html", title: "Create School", icon: "fa-solid fa-square-plus" },
+      { file: "view-schools.html",  title: "View Schools",  icon: "fa-solid fa-building-columns" },
+      { file: "settings.html",      title: "Subscription & Payment Settings", icon: "fa-solid fa-sliders" }
+    ]
+  },
+  {
+    id: "schooladmin",
+    title: "School Admin",
+    icon: "fa-solid fa-building-user",
+    subs: [
+      { file: "school.html",             title: "School Details",  icon: "fa-solid fa-school" },
+      { file: "students.html",           title: "Student Details", icon: "fa-solid fa-user-graduate" },
+      { file: "classes.html",            title: "All Classes",     icon: "fa-solid fa-layer-group" },      /* PLACEHOLDER */
+      { file: "subjects.html",           title: "All Subjects",    icon: "fa-solid fa-book" },
+      { file: "students-bulk.html",      title: "Bulk Student",    icon: "fa-solid fa-users" },
+      { file: "report.html",             title: "Report Card",     icon: "fa-solid fa-file-lines" },
+      { file: "settings.html",           title: "Term & Score Settings", icon: "fa-solid fa-gear" },
+      { file: "contacts.html",           title: "Contacts",        icon: "fa-solid fa-address-book" },      /* PLACEHOLDER */
+      { file: "teacher-bursar.html",     title: "Teacher / Bursar", icon: "fa-solid fa-user-tie" }          /* PLACEHOLDER */
+    ]
+  },
+  {
+    id: "bursar",
+    title: "Bursar",
+    icon: "fa-solid fa-cash-register",
+    subs: [
+      { file: "generate-receipt.html", title: "Payment",      icon: "fa-solid fa-receipt" },
+      { file: "receipt-history.html",  title: "View Records", icon: "fa-solid fa-clock-rotate-left" }
+    ]
+  },
+  {
+    id: "teacher",
+    title: "Teacher",
+    icon: "fa-solid fa-chalkboard-user",
+    subs: [
+      { file: "upload-result.html", title: "Add Score",    icon: "fa-solid fa-upload" },
+      { file: "view-results.html",  title: "View Record",  icon: "fa-solid fa-chart-line" }
+    ]
+  },
+  {
+    id: "signup",
+    title: "Signup / Activate",
+    icon: "fa-solid fa-user-plus",
+    subs: [
+      { file: "signup.html",   title: "Registration", icon: "fa-solid fa-user-plus" },   /* filename unconfirmed */
+      { file: "activate.html", title: "Activate",     icon: "fa-solid fa-key" }           /* PLACEHOLDER */
+    ]
+  }
 ];
 /* ============================================================ */
 
-const groupsEl = document.getElementById('groups');
-const order = [...new Set(PAGES.map(p => p.category))];
-let delay = 0;
+const roleGrid  = document.getElementById('roleGrid');
+const homeView  = document.getElementById('home');
+const detailView= document.getElementById('detail');
+const subGrid   = document.getElementById('subGrid');
+const detailIcon= document.getElementById('detailIcon');
+const detailTitle=document.getElementById('detailTitle');
+const backBtn   = document.getElementById('backBtn');
 
-groupsEl.innerHTML = order.map(cat => {
-  const items = PAGES.filter(p => p.category === cat);
-  const cards = items.map(p => {
-    const d = (delay++ * 0.04).toFixed(2);
-    return `
-      <a class="card ${cat}" href="${p.file}" style="animation-delay:${d}s">
-        <div class="icon"><i class="${p.icon}"></i></div>
-        <span class="label">${p.title}</span>
-      </a>`;
-  }).join('');
-  return `
-    <div class="group">
-      <div class="group-label">${cat}</div>
-      <div class="grid">${cards}</div>
-    </div>`;
-}).join('');
+roleGrid.innerHTML = ROLES.map((r, i) => `
+  <button class="card role-${r.id}" style="animation-delay:${(i*0.05).toFixed(2)}s" data-role="${r.id}">
+    <div class="icon"><i class="${r.icon}"></i></div>
+    <span class="label">${r.title}</span>
+  </button>
+`).join('');
+
+roleGrid.addEventListener('click', e => {
+  const btn = e.target.closest('.card');
+  if (!btn) return;
+  openRole(btn.dataset.role);
+});
+
+function openRole(id){
+  const role = ROLES.find(r => r.id === id);
+  if (!role) return;
+
+  detailIcon.className = `icon role-${role.id}-icon-standalone`;
+  detailIcon.innerHTML = `<i class="${role.icon}"></i>`;
+  detailIcon.style.background = getComputedStyle(document.querySelector(`.role-${role.id} .icon`)).backgroundColor;
+  detailIcon.style.color = getComputedStyle(document.querySelector(`.role-${role.id} .icon`)).color;
+  detailTitle.textContent = role.title;
+
+  subGrid.innerHTML = role.subs.map((s, i) => `
+    <a class="card role-${role.id}" style="animation-delay:${(i*0.05).toFixed(2)}s" href="${s.file}">
+      <div class="icon"><i class="${s.icon}"></i></div>
+      <span class="label">${s.title}</span>
+    </a>
+  `).join('');
+
+  homeView.classList.add('hidden');
+  detailView.style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+backBtn.addEventListener('click', () => {
+  detailView.style.display = 'none';
+  homeView.classList.remove('hidden');
+});
 </script>
 
 </body>
